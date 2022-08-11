@@ -1,5 +1,5 @@
 # Pyrea
-Multi-view hierarchical clustering with flexible ensemble structures.
+Multi-view clustering with flexible ensemble structures.
 
 _The name Pyrea is derived from the Greek word Parea, meaning a group of friends who gather to share experiences, values, and ideas._
 
