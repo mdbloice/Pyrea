@@ -24,7 +24,7 @@ setup(
     name='pyrea',
     version='1.0.0',
     author='Marcus D. Bloice, Bastian Pfeifer',
-    license='GPLv3',
+    license='MIT',
     author_email='marcus.bloice@medunigraz.at',
     description='Multi-view hierarchical clustering with flexible ensemble structures.',
     long_description='Multi-view hierarchical clustering with flexible ensemble structures.',
