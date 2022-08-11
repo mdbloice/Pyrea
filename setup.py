@@ -23,12 +23,12 @@ Operating System :: MacOS
 setup(
     name='pyrea',
     version='1.0.0',
-    author='Marcus D. Bloice, Bastian Pfeifer, et al.',
+    author='Marcus D. Bloice, Bastian Pfeifer',
     license='GPLv3',
     author_email='marcus.bloice@medunigraz.at',
     description='Multi-view hierarchical clustering with flexible ensemble structures.',
     long_description='Multi-view hierarchical clustering with flexible ensemble structures.',
-    url='https://github.com/mdbloice/Parea',
+    url='https://github.com/mdbloice/Pyrea',
     keywords='multi-view, clustering, hierarchical clustering',
     python_requires='>=3.6',
     # package_dir = {"": "src"}
