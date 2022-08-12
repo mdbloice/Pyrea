@@ -26,10 +26,10 @@ setup(
     author='Marcus D. Bloice, Bastian Pfeifer',
     license='MIT',
     author_email='marcus.bloice@medunigraz.at',
-    description='Multi-view hierarchical clustering with flexible ensemble structures.',
-    long_description='Multi-view hierarchical clustering with flexible ensemble structures.',
+    description='Multi-view clustering with flexible ensemble structures.',
+    long_description='Multi-view clustering with flexible ensemble structures.',
     url='https://github.com/mdbloice/Pyrea',
-    keywords='multi-view, clustering, hierarchical clustering',
+    keywords='multi-view, clustering, ensemble clustering',
     python_requires='>=3.6',
     # package_dir = {"": "src"}
     # packages=find_packages("Parea/*", exclude=["test"]),
