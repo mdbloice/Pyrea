@@ -1,20 +1,10 @@
 # Pyrea: Multi-view hierarchical clustering with flexible ensemble structures
 # Copyright (C) 2022 Marcus D. Bloice, Bastian Pfeifer
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see https://www.gnu.org/licenses/
+# Licenced under the terms of the MIT license.
 
 import numpy as np
+import pandas as pd
 
 class View(object):
     """
@@ -44,7 +34,7 @@ class View(object):
 
             v = pyrea.View(data)
 
-        Or (passing a Pandas DataFrame)::
+        Or by passing a Pandas DataFrame (``pandas.core.frame.DataFrame``)::
 
             import pyrea
             import pandas
@@ -53,7 +43,7 @@ class View(object):
 
             v = pyrea.View(data)
 
-        Or (passing a NumPy array (``ndarray``))::
+        Or (passing a NumPy array (``numpy.ndarray``))::
 
             import pyrea
             import numpy
