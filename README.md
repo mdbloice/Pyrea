@@ -44,6 +44,24 @@ fused = pyrea.fuse(pyrea_view1, pyrea_view2)
 
 There are several parameters that can be set, including the type of clustering methods you wish to use.
 
+## Workflows
+Pyrea is built around the concept of *workflows*, a flexible way to create ensembles with different views, clustering techniques, and fusion techniques.
+
+An example workflow consisting of two views can be seen below:
+
+```python
+view1 = pyrea.View(pandas.read_csv('view1.csv'))
+view2 = pyrea.View(pandas.read_csv('view2.csv'))
+
+cluster = parea.Cluster([view1, view2], k=3)
+fuse = parea.Fuse(parea_hc(args))
+
+w = pyrea.Workflow(view1, view2, cluster, fuse)
+w.execute()
+```
+
+Of course, workflows can be much more complex than this.
+
 ## Alternative Usage
 
 Alternatively, we create a `ClusterFuser` object, and compartmentalise the data in to this object. For example:
