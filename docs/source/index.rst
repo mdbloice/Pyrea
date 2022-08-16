@@ -3,8 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Parea's documentation!
+Welcome to Pyrea's documentation!
 =================================
+
+Multi-view hierarchical clustering with flexible ensemble structures.
+
+*The name Pyrea is derived from the Greek word Parea, meaning a group of friends who gather to share experiences, values, and ideas.*
+
+Pyrea is licensed under the terms of the MIT License. See the license section below for details.
 
 .. toctree::
    :maxdepth: 3
