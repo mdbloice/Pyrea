@@ -53,8 +53,9 @@ An example workflow consisting of two views can be seen below:
 view1 = pyrea.View(pandas.read_csv('view1.csv'))
 view2 = pyrea.View(pandas.read_csv('view2.csv'))
 
-cluster = parea.Cluster([view1, view2], k=3)
-fuse = parea.Fuse(parea_hc(args))
+method = pyrea.Method(pyrea.parea_hc(k=3))
+cluster = pyrea.Cluster([view1, view2], method)
+fuse = pyrea.Fuse(parea_hc(args))
 
 w = pyrea.Workflow(view1, view2, cluster, fuse)
 w.execute()
