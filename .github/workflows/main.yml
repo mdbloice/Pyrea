@@ -38,6 +38,6 @@ jobs:
     - name: Test with pytest
       run: |
         # pytest
-        print("Testing pip install...")
+        echo "Testing pip install..."
         pip install pyrea
         python -c "import pyrea"
