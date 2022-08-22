@@ -14,10 +14,12 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # Import Pyrea to get version information.
 import pyrea
+
+print(f"Building docs for Pyrea version {pyrea.__version__} from {pyrea}")
 
 # -- Project information -----------------------------------------------------
 project = 'Pyrea'
@@ -116,7 +118,7 @@ htmlhelp_basename = 'Pyreadoc'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
-    # 'papersize': 'letterpaper',
+    'papersize': 'a4paper',
 
     # The font size ('10pt', '11pt' or '12pt').
     #

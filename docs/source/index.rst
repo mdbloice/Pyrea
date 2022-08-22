@@ -17,6 +17,7 @@ Pyrea is licensed under the terms of the MIT License. See the license section be
    :caption: Contents
 
    code
+   extending
    license
 
 Indices and tables

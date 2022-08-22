@@ -15,6 +15,31 @@ This will install the latest version of Pyrea from PyPI.
 
 ## Usage
 
+### Final
+
+Import Pyrea as follows:
+
+```python
+import pyrea
+```
+
+Once Pyrea has been imported, you begin by creating views. Each view has an associated clustering method, which must be defined when creating the view:
+
+```python
+print(pyrea.CLUSTER_METHODS)
+# ['ward', 'complete', 'single', 'average']
+
+c = pyrea.ClusterMethod("ward")
+v = View(data, clustermethod=c)
+```
+
+To view the clustering algorithms you can use, print
+
+By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.org/pyrea/extending.html#custom-clustering-algorithms) for details.
+
+
+### Previous API
+
 Import Pyrea as follows:
 
 ```python
