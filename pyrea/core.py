@@ -3,8 +3,27 @@
 #
 # Licenced under the terms of the MIT license.
 
+from ast import Raise
+from cmath import exp
 import numpy as np
 import pandas as pd
+
+CLUSTER_METHODS = ['ward', 'complete', 'single', 'average', 'random_method']
+
+
+class ClusterMethod(object):
+    """
+    Top level abstract base class for clusters. Sub-types include
+    :class:`DataCluster` and :class:`BinaryCluster`.
+    """
+    def __init__(self, clustermethod: str) -> None:
+
+        if not isinstance(clustermethod, str):
+            raise TypeError("Parameter 'clustermethod' must be of type string. Choices available are: %s." % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
+
+        if clustermethod not in CLUSTER_METHODS:
+            raise TypeError("Parameter 'clustermethod' must be one of %s and you passed '%s'." % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clustermethod))
+
 
 class View(object):
     """
@@ -15,7 +34,7 @@ class View(object):
     :ivar _is_calculated: Private member variable. Defines if the binary matrix
      has been calculated.
     """
-    def __init__(self, data) -> None:
+    def __init__(self, data, clustermethod: ClusterMethod, header: list = None, name: str = None) -> None:
         """
         Initilisation: A data source, :attr:`data`, which is used to create the
         view. The data source can be a Python matrix (a list of lists), a
@@ -43,7 +62,7 @@ class View(object):
 
             v = pyrea.View(data)
 
-        Or (passing a NumPy array (``numpy.ndarray``))::
+        Or (passing a numpy 2d array or matrix (``numpy.matrix`` or ``numpy.ndarray``))::
 
             import pyrea
             import numpy
@@ -55,9 +74,26 @@ class View(object):
         :param data: The data from which to create your view.
         :type data: Python matrix (list of lists), NumPy Array, Pandas DataFrame
         """
+
+        # We shall attempt to create a NumPy matrix from the data passed:
+        #data = np.asarray(data)
+        #if data.ndim != 2:
+        #    raise Exception("Number of dimensions is not 2: you supplied a data structure with %s dimensions." % data.ndim)
+
+        # Create Numpy matrix (revert to code above is n-dimensional arrays are required)
+        data = np.asmatrix(data)
+
+        if header is not None:
+            if data.shape[1] != len(header):
+                raise Exception("Number of columns in data parameter (%s) does not match number of headers provided (%s)" % (data.shape[1], len(header)))
+
         self.data = data
+        self._ncols = data.shape[1]
+        self.name = name
+        self.header = header
         self.binary_matrix = None
         self._is_calculated = False
+        self._id = None  # Initially set to None, we give it an ID once added to workflow.
 
     def summary(self) -> None:
         """
@@ -88,28 +124,15 @@ class View(object):
             return self.binary_matrix
 
 
-class Cluster(object):
-    """
-    Top level abstract base class for clusters. Sub-types include
-    :class:`DataCluster` and :class:`BinaryCluster`.
-    """
+class Method(object):
+    def __init__(self, method, k) -> None:
 
-class DataCluster(Cluster):
-    """
-    A :class:`Cluster` containing non-binary fused data.
-    """
+        self.method = method
 
-class BinaryCluster(Cluster):
-    """
-    A :class:`Cluster` containing binary fused cluster data.
-    """
-
-class ClusterFuser(object):
-    """
-    The ClusterFuser fuses clusters that have been loaded.
-    """
-    def __init__(self) -> None:
-        pass
+        if self.k is None:
+            self.k = 'auto'
+        else:
+            self.k = k
 
 
 class Pipeline(object):
@@ -132,3 +155,38 @@ def summary():
     print("\n")
 
     print("*" * 80)
+
+
+class Workflow(object):
+    """
+    Represents a workflow.
+
+    :ivar elements: A list of tuples containing the elements of the workflow,
+     for example, views, clusterers, and fusers.
+    """
+    def __init__(self, *args) -> None:
+
+
+        self._num_elements = len(args)
+
+        if args is not None:
+            self.elements = args
+
+            for i in range(len(args)):
+                self.elements.append((i, args[i]))
+
+        else:
+            self.elements = []
+
+    def add_view(self, view: View):
+        self._num_elements += 1
+        view._id = self._num_elements
+
+        self.elements.append(view)
+
+    def add_clusterer(self, cluster: ClusterMethod):
+        self.elements.append(cluster)
+
+
+class FusedMatrix(View):
+    pass
