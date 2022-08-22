@@ -41,5 +41,5 @@ jobs:
         echo "Testing pip install..."
         pip install pyrea
         echo "Testing Pyrea import..."
-        python -c "import pyrea"
+        python -c "import pyrea;print(pyrea.__version__)"
         echo "Import OK"
