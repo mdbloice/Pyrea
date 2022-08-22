@@ -12,7 +12,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest, windows-latest, macos-latest
+    runs-on: ubuntu-latest  # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstrategy
     strategy:
       fail-fast: false
       matrix:
