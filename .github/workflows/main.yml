@@ -40,4 +40,6 @@ jobs:
         # pytest
         echo "Testing pip install..."
         pip install pyrea
+        echo "Testing Pyrea import..."
         python -c "import pyrea"
+        echo "Import OK"
