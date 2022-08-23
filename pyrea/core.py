@@ -3,10 +3,8 @@
 #
 # Licenced under the terms of the MIT license.
 
-from ast import Raise
 from cmath import exp
 import numpy as np
-import pandas as pd
 
 CLUSTER_METHODS = ['ward', 'complete', 'single', 'average', 'random_method']
 
@@ -19,10 +17,12 @@ class ClusterMethod(object):
     def __init__(self, clustermethod: str) -> None:
 
         if not isinstance(clustermethod, str):
-            raise TypeError("Parameter 'clustermethod' must be of type string. Choices available are: %s." % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
+            raise TypeError("Parameter 'clustermethod' must be of type string. Choices available are: %s."
+                            % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
 
         if clustermethod not in CLUSTER_METHODS:
-            raise TypeError("Parameter 'clustermethod' must be one of %s and you passed '%s'." % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clustermethod))
+            raise TypeError("Parameter 'clustermethod' must be one of %s and you passed '%s'."
+                            % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clustermethod))
 
 
 class View(object):
@@ -80,12 +80,14 @@ class View(object):
         #if data.ndim != 2:
         #    raise Exception("Number of dimensions is not 2: you supplied a data structure with %s dimensions." % data.ndim)
 
-        # Create Numpy matrix (revert to code above is n-dimensional arrays are required)
+        # Numpy matrices are 2d-arrays, so checking dimensionality is not required.
+        # Create Numpy matrix (revert to code above if n-dimensional arrays are required)
         data = np.asmatrix(data)
 
         if header is not None:
             if data.shape[1] != len(header):
-                raise Exception("Number of columns in data parameter (%s) does not match number of headers provided (%s)" % (data.shape[1], len(header)))
+                raise Exception("Number of columns in data parameter (%s) does not match number of headers provided (%s)"
+                                % (data.shape[1], len(header)))
 
         self.data = data
         self._ncols = data.shape[1]
