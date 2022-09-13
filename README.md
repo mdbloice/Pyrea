@@ -25,9 +25,7 @@ To create a view you must have some data, and a clusterer:
 ```python
 import pyrea
 
-# Create a random 3x3 matrix as your data
-d = np.random.rand(3,3)
-
+# Create your data, which must be a 2-dimensional array/matrix.
 d = [[1,2,3],
      [4,5,6],
      [7,8,9]]
@@ -37,10 +35,27 @@ c = pyrea.clusterer("ward", **params)
 
 v = pyrea.View(d, c)
 ```
-You now have a view `v`, containing the data `d` using the clustering algiorithm
-`c`.
+You now have a view `v`, containing the data `d` using the clustering algorithm
+`c`. Note that many views can share the same clusterer, or each view may have a
+unique clusterer.
 
-Many views can share the same clusterer. Or each view may have a unique clusterer.
+As this is a library for multi-view ensemble learning, you will normally have
+multiple views.
+
+A fusion algorithm is therefore used to fused the clusters created by multiple
+views. Therefore, our next step is to create a fuser object:
+
+```python
+f = pyrea.fuser('parea', c)
+```
+
+With you fusion algorithm `f`, you can create an *ensemble*. The ensemble is
+created with clustering algorithm just as with views:
+
+```pythom
+e = pyrea.ensemble([v1, v2, v3], c)
+```
+
 
 ```python
 # Define clustering techniques
