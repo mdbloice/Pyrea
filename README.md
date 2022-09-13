@@ -28,11 +28,9 @@ import pyrea
 # Create a random 3x3 matrix as your data
 d = np.random.rand(3,3)
 
-d = [
-     [1,2,3],
+d = [[1,2,3],
      [4,5,6],
-     [7,8,9]
-    ]
+     [7,8,9]]
 
 # Create a clusterer
 c = pyrea.clusterer("ward", **params)
