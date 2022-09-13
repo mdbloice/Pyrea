@@ -22,7 +22,7 @@ form of a 2D matrix, and an associated clusterer.
 
 To create a view you must have some data, and a clusterer:
 
-```
+```python
 import pyrea
 
 # Create a random 3x3 matrix as your data
