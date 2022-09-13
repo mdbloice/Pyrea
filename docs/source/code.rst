@@ -14,3 +14,10 @@ The ``core`` Module
 .. automodule:: pyrea.core
     :members:
     :undoc-members:
+
+The ``structure`` Module
+========================
+
+.. automodule:: pyrea.structure
+    :members:
+    :undoc-members:

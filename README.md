@@ -15,7 +15,65 @@ This will install the latest version of Pyrea from PyPI.
 
 ## Usage
 
-### Final
+### API
+
+In Pyrea, you data are organised in to views. A view consists of the data in the
+form of a 2D matrix, and an associated clusterer.
+
+To create a view you must have some data, and a clusterer:
+
+```
+import pyrea
+
+# Create a random 3x3 matrix as your data
+d = np.random.rand(3,3)
+
+d = [
+     [1,2,3],
+     [4,5,6],
+     [7,8,9]
+    ]
+
+# Create a clusterer
+c = pyrea.clusterer("ward", **params)
+
+v = pyrea.View(d, c)
+```
+You now have a view `v`, containing the data `d` using the clustering algiorithm
+`c`.
+
+Many views can share the same clusterer. Or each view may have a unique clusterer.
+
+```python
+# Define clustering techniques
+c1 = pyrea.cluster.KMeans()
+c2 = pyrea.cluster.XYZ()
+c3 = pyrea.cluster.XYZ()
+
+# Make some datasets
+d1 = np.random.rand(3,3)
+d2 = np.random.rand(3,3)
+d3 = np.random.rand(3,3)
+
+# A view consists of a dataset (2d array/matrix) and a clustering algorithm
+v1 = pyrea.View(d1, c1)
+v2 = pyrea.View(d2, c2)
+v3 = pyrea.View(d3, c3)
+
+# A fuser is instantiated with a clustering algorithm also
+f = pyrea.fusion.consensus(c1)
+
+# An ensemble consists of views and a fusion algorithm:
+e1 = Ensemble([v1,v2,v3], f)
+e2 = Ensemble([v1,v2,v3], f)
+
+# An ensemble can also be made from ensembles instead of views
+e3 = Ensemble([e1, e2], f)
+
+e3.execute()  # returns a final cluster
+```
+
+### Second Attempt at API
 
 Import Pyrea as follows:
 
@@ -31,6 +89,8 @@ print(pyrea.CLUSTER_METHODS)
 
 c = pyrea.ClusterMethod("ward")
 v = View(data, clustermethod=c)
+
+v_r = v.execute()
 ```
 
 To view the clustering algorithms you can use, print
@@ -38,7 +98,7 @@ To view the clustering algorithms you can use, print
 By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.org/pyrea/extending.html#custom-clustering-algorithms) for details.
 
 
-### Previous API
+### First Attempt at API
 
 Import Pyrea as follows:
 
