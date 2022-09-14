@@ -126,7 +126,7 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': '',
+    # 'preamble': r'\usepackage{stmaryrd}',
 
     # Latex figure (float) alignment
     #
