@@ -5,12 +5,11 @@
 
 from cmath import exp
 
-from .structure import View
-from .structure import Ward
+from .structure import Disagreement, Fusion, View, Ward
 
 CLUSTER_METHODS = ['ward', 'complete', 'single', 'average', 'random']
 
-def new_clusterer(clusterer: str, data):
+def clusterer(clusterer: str, data):
     if not isinstance(clusterer, str):
         raise TypeError("Parameter 'clusterer' must be of type string. Choices available are: %s."
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
@@ -23,6 +22,20 @@ def new_clusterer(clusterer: str, data):
         return Ward(data=data)
     else:
         return None
+
+def fuser(views: list, fuser: str='parea'):
+     
+    if not isinstance(fuser, str):
+        raise TypeError("Parameter 'fuser' must be of type string.")
+
+    if not isinstance(views, list):
+        raise TypeError("Parameter 'views' must be of type list.")
+
+    return Disagreement(views)
+
+def ensemble(views: list, fuser: Fusion):
+    if not isinstance(views, list):
+        raise TypeError("Parameter 'views' must be of type list. You provided %s" % type(views))
 
 def summary():
     """

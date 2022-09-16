@@ -11,11 +11,56 @@ from re import A
 import time
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
+from .fusion import disagreement
 
+class Fusion(object):
+    def __init__(self) -> None:
+        pass
+    
+    def execute():
+        pass
+
+class Parea(Fusion):
+    def __init__(self) -> None:
+        super().__init__()
+    
+    def execute():
+        pass
+
+
+class Disagreement(Fusion):
+    def __init__(self, views: list) -> None:
+        super().__init__()
+        
+        self.labels = None
+        self.views = []
+
+        # Check all views are of the same length
+        if not all(len(views[0]) == len(_) for _ in views):
+            raise TypeError("The size of thew views must be equal.")
+        else:
+            self.views = views
+
+    def execute(self):
+
+        n  = len(self.views[0])
+        labels  = np.zeros((n, n), dtype=int)
+    
+        for view_index in range(0, len(self.views)):
+
+            l = self.views[view_index]
+            res = [[int(x != y) for y in l] for x in l]
+            res = np.matrix(res)
+            mat = mat + res
+
+            return(mat)
 
 class Clusterer(object):
     def __init__(self) -> None:
         pass
+
+    def __str__(self) -> str:
+        return str(self.labels)
 
     def execute():
         pass
@@ -132,7 +177,7 @@ class Ward(Clusterer):
 
     def execute(self):
         self.labels = AgglomerativeClustering().fit(self.data).labels_
-        return self.labels
+        return self
 
 
 class KMeans(Clusterer):
