@@ -7,7 +7,6 @@
 # Contains the classes required for the structuring of ensembles, for example
 # Views, Ensembles, Clusterers, and so on.
 
-from re import A
 import time
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
@@ -16,44 +15,42 @@ from .fusion import disagreement
 class Fusion(object):
     def __init__(self) -> None:
         pass
-    
+
     def execute():
         pass
+
 
 class Parea(Fusion):
     def __init__(self) -> None:
         super().__init__()
-    
+
     def execute():
         pass
 
 
 class Disagreement(Fusion):
-    def __init__(self, views: list) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        
-        self.labels = None
-        self.views = []
 
         # Check all views are of the same length
-        if not all(len(views[0]) == len(_) for _ in views):
-            raise TypeError("The size of thew views must be equal.")
-        else:
-            self.views = views
+        #if not all(len(views[0]) == len(_) for _ in views):
+        #    raise TypeError("The size of thew views must be equal.")
+        #else:
+        #    self.views = views
 
-    def execute(self):
+    def execute(self, views: list) -> list:
 
-        n  = len(self.views[0])
-        labels  = np.zeros((n, n), dtype=int)
-    
-        for view_index in range(0, len(self.views)):
+        n  = len(views[0])
+        labels = np.zeros((n, n), dtype=int)
 
-            l = self.views[view_index]
+        for view_index in range(0, len(views)):
+            l = views[view_index]
             res = [[int(x != y) for y in l] for x in l]
             res = np.matrix(res)
-            mat = mat + res
+            labels = labels + res
 
-            return(mat)
+        return labels
+
 
 class Clusterer(object):
     def __init__(self) -> None:
@@ -133,9 +130,8 @@ class View(object):
         self._ncols = data.shape[1]
         self.name = name
         self.header = header
-        self._is_calculated = False
         self._id = None  # Initially set to None, we give it an ID once added to workflow.
-        self._cluster = None
+        self.labels = None
 
     def summary(self) -> None:
         """
@@ -155,29 +151,20 @@ class View(object):
         print('Summary statistics.')
         return None
 
-    def get_binary_matrix(self) -> np.ndarray:
-        """
-        Returns the binary matrix of your view. If no binary matrix has been
-        calculated a NameError is thrown.
-        """
-        if not self.binary_matrix:
-            raise NameError('A binary matrix has not been calculated and does not exist')
-        else:
-            return self.binary_matrix
-
     def execute(self):
-        self._cluster = self.clustermethod.execute(self.data)
+
+        self.labels = self.clusterer.execute(self.data)
+
+        return self.labels
 
 
 class Ward(Clusterer):
-    def __init__(self, data) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.data = data
-        self.labels = None
 
-    def execute(self):
-        self.labels = AgglomerativeClustering().fit(self.data).labels_
-        return self
+    def execute(self, data):
+
+        return AgglomerativeClustering().fit(data).labels_
 
 
 class KMeans(Clusterer):
@@ -190,16 +177,19 @@ class KMeans(Clusterer):
 
 
 class Ensemble(object):
-    def __init__(self, views: list, fuser: list) -> None:
+    def __init__(self, elements: list, fuser: Fusion) -> None:
 
-        # If we see 1 clusterer, we use it for all views. Change this.
-        #if len(views) is not len(views):
-        #    raise Exception("Number of elements (views or ensembles) (%s) does not match number of clusterers (%s)." % (len(views), len(clusterers)))
-
-        self.views = views
+        self.elements = elements
         self.fuser = fuser
-        self._fusion_matrix = None
+        self.clusters = []
+        self.labels = None
 
     def execute(self):
 
-        pass
+        for e in self.elements:
+
+            self.clusters.append(e.execute())
+
+        self.labels = self.fuser.execute(self.clusters)
+
+        return self.labels

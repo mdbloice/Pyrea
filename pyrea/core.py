@@ -3,13 +3,18 @@
 #
 # Licenced under the terms of the MIT license.
 
+from array import array
 from cmath import exp
 
-from .structure import Disagreement, Fusion, View, Ward
+from .structure import Clusterer, Disagreement, Ensemble, Fusion, View, Ward
 
 CLUSTER_METHODS = ['ward', 'complete', 'single', 'average', 'random']
+FUSION_METHODS = ['disagreenent', 'parea', 'agreement']
 
-def clusterer(clusterer: str, data):
+CLUSTER_METHODS.sort()
+FUSION_METHODS.sort()
+
+def clusterer(clusterer: str):
     if not isinstance(clusterer, str):
         raise TypeError("Parameter 'clusterer' must be of type string. Choices available are: %s."
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
@@ -19,23 +24,29 @@ def clusterer(clusterer: str, data):
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clusterer))
 
     if clusterer is 'ward':
-        return Ward(data=data)
+        return Ward()
+    elif clusterer is 'complete':
+        return Ward()
     else:
-        return None
+        return None # Will never get here unless things go very wrong indeed
 
-def fuser(views: list, fuser: str='parea'):
-     
+def view(data: array, clusterer: Clusterer):
+
+    return View(data, clusterer)
+
+def fuser(fuser: str='parea'):
+
     if not isinstance(fuser, str):
         raise TypeError("Parameter 'fuser' must be of type string.")
 
-    if not isinstance(views, list):
-        raise TypeError("Parameter 'views' must be of type list.")
-
-    return Disagreement(views)
+    # currently we will return a disagreement object
+    return Disagreement()
 
 def ensemble(views: list, fuser: Fusion):
     if not isinstance(views, list):
         raise TypeError("Parameter 'views' must be of type list. You provided %s" % type(views))
+
+    return Ensemble(views, fuser)
 
 def summary():
     """
