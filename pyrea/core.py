@@ -23,9 +23,9 @@ def clusterer(clusterer: str):
         raise TypeError("Parameter 'clusterer' must be one of %s and you passed '%s'."
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clusterer))
 
-    if clusterer is 'ward':
+    if clusterer == 'ward':
         return Ward()
-    elif clusterer is 'complete':
+    elif clusterer == 'complete':
         return Ward()
     else:
         return None # Will never get here unless things go very wrong indeed
