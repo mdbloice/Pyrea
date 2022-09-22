@@ -87,11 +87,25 @@ v2 = pyrea.view(d1, c)
 f = pyrea.fuser('parea')
 
 # Create your ensemble
-e = pyrea.ensemble([v1, v2], f)
+e = pyrea.ensemble([v1, v2], f, c)
 
 # Execute the ensemble
 e.execute()
 ```
+
+## Ensemble Structures
+Complex structures can be built using Pyrea.
+
+For example, examine the two structures below:
+
+![Ensemble Structures](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/parea.png)
+
+We will demonstrate how to create deep and flexible ensemble structures using the examples  a) and b) from the image above.
+
+### Example A
+This ensemble consists of two sets of three views, which are clustered, fused, and then once again combined in a second layer.
+
+**Work in progress**
 
 ## Deep Ensembles
 Pyrea can be used to create deep ensembles.
