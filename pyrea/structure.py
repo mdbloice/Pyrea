@@ -1,16 +1,29 @@
-# Pyrea: Multi-view hierarchical clustering with flexible ensemble structures
+# Pyrea: Multi-view clustering with deep ensemble structures
 # Copyright (C) 2022 Marcus D. Bloice, Bastian Pfeifer
+#
 #
 # Licenced under the terms of the MIT license.
 #
 # structure.py
-# Contains the classes required for the structuring of ensembles, for example
-# Views, Ensembles, Clusterers, and so on.
+# Contains the classes required for the structuring of ensembles, for
+# example Views, Ensembles, Clusterers, and so on.
 
-import time
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
+
 from .fusion import disagreement
+
+
+class Clusterer(object):
+    def __init__(self) -> None:
+        pass
+
+    def __str__(self) -> str:
+        return str(self.labels)
+
+    def execute():
+        pass
+
 
 class Fusion(object):
     def __init__(self) -> None:
@@ -50,17 +63,6 @@ class Disagreement(Fusion):
             labels = labels + res
 
         return labels
-
-
-class Clusterer(object):
-    def __init__(self) -> None:
-        pass
-
-    def __str__(self) -> str:
-        return str(self.labels)
-
-    def execute():
-        pass
 
 
 class View(object):
@@ -167,22 +169,15 @@ class Ward(Clusterer):
         return AgglomerativeClustering().fit(data).labels_
 
 
-class KMeans(Clusterer):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def execute(self, view: View):
-        print("Executing clustering algorithm")
-        time.sleep(3)
-
-
 class Ensemble(object):
-    def __init__(self, elements: list, fuser: Fusion) -> None:
+    def __init__(self, elements: list, fuser: Fusion, clusterers: list):
 
         self.elements = elements
         self.fuser = fuser
+        self.clusterers = clusterers
         self.clusters = []
-        self.labels = None
+        self.labels = []
+        self.fusion_matrix = None
 
     def execute(self):
 
@@ -190,6 +185,9 @@ class Ensemble(object):
 
             self.clusters.append(e.execute())
 
-        self.labels = self.fuser.execute(self.clusters)
+        self.fusion_matrix = self.fuser.execute(self.clusters)
 
-        return self.labels
+        for c in self.clusterers:
+            self.labels.append(c.execute(self.fusion_matrix))
+
+        return self

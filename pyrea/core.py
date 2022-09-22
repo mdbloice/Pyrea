@@ -34,7 +34,7 @@ def view(data: array, clusterer: Clusterer):
 
     return View(data, clusterer)
 
-def fuser(fuser: str='parea'):
+def fuser(fuser: str):
 
     if not isinstance(fuser, str):
         raise TypeError("Parameter 'fuser' must be of type string.")
@@ -42,11 +42,11 @@ def fuser(fuser: str='parea'):
     # currently we will return a disagreement object
     return Disagreement()
 
-def ensemble(views: list, fuser: Fusion):
+def ensemble(views: list, fuser: Fusion, clusterers: list):
     if not isinstance(views, list):
         raise TypeError("Parameter 'views' must be of type list. You provided %s" % type(views))
 
-    return Ensemble(views, fuser)
+    return Ensemble(views, fuser, clusterers)
 
 def summary():
     """

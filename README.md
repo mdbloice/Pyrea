@@ -154,7 +154,7 @@ e3 = pyrea.ensemble([e1, e2], f, [c1, c2])
 e3.execute()
 ```
 
-Note to self, we could do it like this: `v2 = pyrea.view(e2.execute(), hc1)`
+Note to self, could also do it like this: `v2 = pyrea.view(e2.execute(), hc1)`
 
 ## Deep Ensembles
 Pyrea can be used to create deep ensembles.
