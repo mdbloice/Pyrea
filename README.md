@@ -1,7 +1,7 @@
 # Pyrea
 
 <center>
-<img src="https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/Pyrea-logos_transparent.png" width="400" align="left">
+<img src="https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/Pyrea-logos_transparent.png" width="400" align="center">
 </center>
 
 Multi-view clustering with flexible ensemble structures.
