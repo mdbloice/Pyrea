@@ -4,7 +4,7 @@ CLASSIFIERS = """
 Development Status :: 1 - Planning
 Intended Audience :: Science/Research
 Intended Audience :: Developers
-License :: OSI Approved :: MIT
+License :: OSI Approved :: MIT License
 Programming Language :: Python
 Programming Language :: Python :: 3
 Programming Language :: Python :: 3.6
@@ -22,7 +22,7 @@ Operating System :: MacOS
 
 setup(
     name='pyrea',
-    version='1.0.0',
+    version='1.0.1',
     author='Marcus D. Bloice, Bastian Pfeifer',
     license='MIT',
     author_email='marcus.bloice@medunigraz.at',
