@@ -1,4 +1,9 @@
 # Pyrea
+
+<center>
+<img src="https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/Pyrea-logos_transparent.png" width=400>
+</center>
+
 Multi-view clustering with flexible ensemble structures.
 
 _The name Pyrea is derived from the Greek word Parea, meaning a group of friends who gather to share experiences, values, and ideas._
@@ -33,7 +38,7 @@ d = [[1,2,3],
 # Create a clusterer
 c = pyrea.clusterer("ward")
 
-v = pyrea.View(d, c)
+v = pyrea.view(d, c)
 ```
 
 You now have a view `v`, containing the data `d` using the clustering algorithm
@@ -106,6 +111,50 @@ We will demonstrate how to create deep and flexible ensemble structures using th
 This ensemble consists of two sets of three views, which are clustered, fused, and then once again combined in a second layer.
 
 **Work in progress**
+
+We create two ensembles, which represent the first layer of the structure A in the image above:
+
+```python
+import pyrea
+import numpy as np
+
+# Define our clustering algorithms(s) and fusion algorimth(s) first that we
+# will use multiple times.
+# Clusterers:
+hc1 = pyrea.clusterer('ward')
+hc2 = pyrea.clusterer('complete')
+# Fusers:
+parea_fuser = pyrea.fuser('parea')
+
+# Data (random data for now)
+d1 = np.random.rand(100,10)
+d2 = np.random.rand(100,10)
+d3 = np.random.rand(100,10)
+
+# Views for ensemble 1
+view1_e1 = pyrea.view(d1, hc1)
+view2_e1 = pyrea.view(d2, hc1)
+view3_e1 = pyrea.view(d3, hc1)
+
+# Ensemble 1
+e1 = pyrea.ensemble([view1_e1, view2_e1, view3_e1], f, hc1)
+
+# Views for ensemble 2
+view1_e2 = pyrea.view(d1, hc2)
+view2_e2 = pyrea.view(d2, hc2)
+view3_e2 = pyrea.view(d3, hc2)
+
+e2 = pyrea.ensemble([view1_e2, view2_e2, view3_e2], f, hc1)
+
+f1_a = pyrea.view(e1, hc1)
+f2_a = pyrea.view(e2, hc1)
+
+e3 = pyrea.ensemble([e1, e2], f, [c1, c2])
+
+e3.execute()
+```
+
+Note to self, we could do it like this: `v2 = pyrea.view(e2.execute(), hc1)`
 
 ## Deep Ensembles
 Pyrea can be used to create deep ensembles.
