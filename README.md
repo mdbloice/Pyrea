@@ -43,19 +43,27 @@ unique clusterer.
 As this is a library for multi-view ensemble learning, you will normally have
 multiple views.
 
-A fusion algorithm is therefore used to fused the clusters created by multiple
-views. Therefore, our next step is to create a fuser object:
+A fusion algorithm is therefore used to fused the clusters created from multiple
+views. Therefore, our next step is to create a *fuser* object:
 
 ```python
 f = pyrea.fuser('parea')
 ```
 
 With you fusion algorithm `f`, you can create an *ensemble*. The ensemble is
-created with clustering algorithm just as with views:
+created with your views, the fusion algorithm, and a clustering algorithm:
 
 ```pythom
-e = pyrea.ensemble([v1, v2, v3], f)
+e = pyrea.ensemble([v1, v2, v3], f, c)
 ```
+
+To perform this operation you execute the ensemble:
+
+```python
+e.execute()
+```
+
+which returns your clustered fusion matrix.
 
 A full example is shown below:
 
@@ -84,6 +92,14 @@ e = pyrea.ensemble([v1, v2], f)
 # Execute the ensemble
 e.execute()
 ```
+
+## Deep Ensembles
+Pyrea can be used to create deep ensembles.
+
+## Genetic Algorithm
+Pyrea can select the best clustering algorithms and fusion algorithms based on a genetic algorithm optimisation technique.
+
+**Work in progress...**
 
 ## Clustering Methods
 
