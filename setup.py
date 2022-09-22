@@ -37,7 +37,7 @@ setup(
     install_requires=[
         'pandas>0.20.0',
         'numpy>1.0.0',
-        'sklearn>1.1.0'
+        'scikit-learn>1.1.0'
     ],
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f]
 )
