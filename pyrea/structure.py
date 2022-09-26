@@ -15,6 +15,12 @@ from .fusion import disagreement
 
 
 class Clusterer(object):
+    """
+    Abstract Base Class for all clustering algorithms.
+
+    All clustering methods must implement the base class's methods
+    in order for it to be used as a clusterer within Pyrea.
+    """
     def __init__(self) -> None:
         pass
 
@@ -22,6 +28,9 @@ class Clusterer(object):
         return str(self.labels)
 
     def execute():
+        """
+        Execute the clustering algorithm. For internal use only.
+        """
         pass
 
 
@@ -36,6 +45,7 @@ class Fusion(object):
 class Parea(Fusion):
     def __init__(self) -> None:
         super().__init__()
+        raise Exception("Not yet implemented.")
 
     def execute():
         pass
@@ -56,14 +66,34 @@ class Disagreement(Fusion):
         n  = len(views[0])
         labels = np.zeros((n, n), dtype=int)
 
-        for view_index in range(0, len(views)):
-            l = views[view_index]
+        for i in range(0, len(views)):
+            l = views[i]
             res = [[int(x != y) for y in l] for x in l]
             res = np.matrix(res)
             labels = labels + res
 
         return labels
 
+
+class Agreement(Fusion):
+    def __init__(self) -> None:
+        super().__init__()
+        pass
+
+    def execute(views: list):
+
+        n_samp  = len(views[0])
+
+        labels  = np.zeros((n_samp, n_samp), dtype=int)
+
+        for i in range(0, len(views)):
+
+            l = views[i]
+            res = [[int(x == y) for y in l] for x in l]
+            res = np.matrix(res)
+            labels = labels + res
+
+        return labels
 
 class View(object):
     """
@@ -155,6 +185,7 @@ class View(object):
 
     def execute(self):
 
+        print("Running view.execute()...")
         self.labels = self.clusterer.execute(self.data)
 
         return self.labels
@@ -166,7 +197,15 @@ class Ward(Clusterer):
 
     def execute(self, data):
 
-        return AgglomerativeClustering().fit(data).labels_
+        return AgglomerativeClustering(linkage='ward').fit(data).labels_
+
+
+class Complete(Clusterer):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def execute(self, data):
+        return AgglomerativeClustering(linkage='average').fit(data).labels_
 
 
 class Ensemble(object):
@@ -181,6 +220,12 @@ class Ensemble(object):
 
     def execute(self):
 
+        # Check if this ensemble contains further ensembles, or views.
+        # If we contain ensembles, we need to iterate over these and allow
+        # them to execute first. If they themselves contain ensembles the same
+        # will happen there.
+
+        print ("Running ensemble.execute()...")
         for e in self.elements:
 
             self.clusters.append(e.execute())
@@ -190,4 +235,4 @@ class Ensemble(object):
         for c in self.clusterers:
             self.labels.append(c.execute(self.fusion_matrix))
 
-        return self
+        return self.labels[0]

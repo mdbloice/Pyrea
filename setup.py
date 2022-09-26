@@ -20,19 +20,24 @@ Operating System :: POSIX :: Linux
 Operating System :: MacOS
 """
 
+with open('README.md', 'r') as readme:
+    long_description = readme.read()
+
 setup(
     name='pyrea',
     version='1.0.1',
     author='Marcus D. Bloice, Bastian Pfeifer',
     license='MIT',
     author_email='marcus.bloice@medunigraz.at',
-    description='Multi-view clustering with flexible ensemble structures.',
-    long_description='Multi-view clustering with flexible ensemble structures.',
+    description='Multi-view clustering with deep ensemble structures.',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/mdbloice/Pyrea',
     keywords='multi-view, clustering, ensemble clustering',
     python_requires='>=3.6',
     # package_dir = {"": "src"}
     # packages=find_packages("Parea/*", exclude=["test"]),
+    # py_modules=["xyz"],
     packages=['pyrea'],
     install_requires=[
         'pandas>0.20.0',

@@ -6,13 +6,10 @@
 from array import array
 from cmath import exp
 
-from .structure import Clusterer, Disagreement, Ensemble, Fusion, View, Ward
+from .structure import Clusterer, Complete, Disagreement, Ensemble, Fusion, View, Ward
 
-CLUSTER_METHODS = ['ward', 'complete', 'single', 'average', 'random']
-FUSION_METHODS = ['disagreenent', 'parea', 'agreement']
-
-CLUSTER_METHODS.sort()
-FUSION_METHODS.sort()
+CLUSTER_METHODS = ['average', 'complete', 'random', 'single', 'ward']
+FUSION_METHODS = ['agreement', 'disagreenent', 'parea']
 
 def clusterer(clusterer: str):
     if not isinstance(clusterer, str):
@@ -26,7 +23,7 @@ def clusterer(clusterer: str):
     if clusterer == 'ward':
         return Ward()
     elif clusterer == 'complete':
-        return Ward()
+        return Complete()
     else:
         return None # Will never get here unless things go very wrong indeed
 
