@@ -165,7 +165,7 @@ c2 = pyrea.clusterer('complete')
 c3 = pyrea.clusterer('single')
 
 # Fusion algorithm
-fuser = pyrea.fuser('disagreement')
+f = pyrea.fuser('disagreement')
 
 # Data
 d1 = np.random.rand(100,10)
