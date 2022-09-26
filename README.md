@@ -8,6 +8,8 @@ Multi-view clustering with flexible ensemble structures.
 
 _The name Pyrea is derived from the Greek word Parea, meaning a group of friends who gather to share experiences, values, and ideas._
 
+![PyPI](https://img.shields.io/pypi/v/Pyrea) ![PyPI - License](https://img.shields.io/pypi/l/Pyrea) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Pyrea)
+
 ## Installation
 
 Install Pyrea using `pip`:
