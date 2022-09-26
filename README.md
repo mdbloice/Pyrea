@@ -146,15 +146,40 @@ view3_e2 = pyrea.view(d3, hc2)
 
 e2 = pyrea.ensemble([view1_e2, view2_e2, view3_e2], f, hc1)
 
-f1_a = pyrea.view(e1, hc1)
-f2_a = pyrea.view(e2, hc1)
-
 e3 = pyrea.ensemble([e1, e2], f, [c1, c2])
 
 e3.execute()
 ```
 
-Note to self, could also do it like this: `v2 = pyrea.view(e2.execute(), hc1)`
+As for structure b) above, this can implemented as follows:
+
+```python
+import pyrea
+import numpy as np
+
+# Clustering algorithms
+c1 = pyrea.clusterer('ward')
+c2 = pyrea.clusterer('complete')
+c3 = pyrea.clusterer('single')
+
+# Fusion algorithm
+fuser = pyrea.fuser('disagreement')
+
+# Data
+d1 = np.random.rand(100,10)
+d2 = np.random.rand(100,10)
+d3 = np.random.rand(100,10)
+
+v1 = pyrea.view(d1, c1)
+v2 = pyrea.view(d2, c2)
+v3 = pyrea.view(d3, c3)
+
+e = pyrea.ensemble([v1, v2, v3], f, [c1, c2, c3])
+
+e.execute()
+```
+
+Notice how the ensemble is passed 3 clustering algorithms, and these are combined for a final clustering.
 
 ## Deep Ensembles
 Pyrea can be used to create deep ensembles.
