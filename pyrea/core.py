@@ -14,7 +14,10 @@ FUSION_METHODS = ['agreement', 'consensus', 'disagreenent']
 
 def clusterer(clusterer: str, n_clusters: int=2) -> Clusterer:
     """
-    Creates a :class:`~pyrea.structure.Clusterer` object to be used when creating a :class:`~pyrea.structure.View` or :class:`~pyrea.structure.Ensemble`. Can be one of: average, complete, random, single, or ward.
+    Creates a :class:`~pyrea.structure.Clusterer` object to be used when 
+    creating a :class:`~pyrea.structure.View` or 
+    :class:`~pyrea.structure.Ensemble`. Can be one of: average, complete, 
+    random, single, or ward.
 
     .. code::
 
