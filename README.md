@@ -188,17 +188,17 @@ Notice how the ensemble is passed 3 clustering algorithms, and these are combine
 ## Deep Ensembles
 Pyrea can be used to create deep ensembles.
 
-## Genetic Algorithm
-Pyrea can select the best clustering algorithms and fusion algorithms based on a genetic algorithm optimisation technique.
-
-**Work in progress...**
-
-## Clustering Methods
-
-See [`scipy`](https://docs.scipy.org/doc/scipy/reference/cluster.html) and [`sklearn`](https://scikit-learn.org/stable/modules/clustering.html) for details.
-
 ## Extensible
 
 Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusion techniques with custom clustering algorithms that can be loaded in to Pyrea at run-time.
 
 By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.org/pyrea/extending.html#custom-clustering-algorithms) for details.
+
+# Work In Progress
+Several features described in the package's corresponding paper (see package citation) are not yet complete, these are described here.
+
+## Genetic Algorithm
+Pyrea can select the best clustering algorithms and fusion algorithms based on a genetic algorithm optimisation technique.
+
+## Parea Clustering Algorithm
+This functionality is work in progress and will be included soon.
