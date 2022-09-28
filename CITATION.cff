@@ -1,0 +1,10 @@
+@article{pfeifer2021parea,
+title = {A hierarchical clustering and data fusion approach for disease subtype discovery},
+journal = {Journal of Biomedical Informatics},
+volume = {113},
+year = {2021},
+issn = {1532-0464},
+doi = {https://doi.org/10.1016/j.jbi.2020.103636},
+url = {https://www.sciencedirect.com/science/article/pii/S1532046420302641},
+author = {Bastian Pfeifer and Michael G. Schimek}
+}
