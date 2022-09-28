@@ -17,9 +17,8 @@ preferred-citation:
     given-names: "Bastian"
   - family-names: "Schimeck"
     given-names: "Michael G."
-  doi: "https://doi.org/10.1016/j.jbi.2020.103636"
+  doi: "10.1016/j.jbi.2020.103636"
   journal: "Journal of Biomedical Informatics"
   title: "A hierarchical clustering and data fusion approach for disease subtype discovery"
   volume: 113
   year: 2021
-  issn: "1532-0464"
