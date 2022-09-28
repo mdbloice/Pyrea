@@ -24,6 +24,8 @@ This will install the latest version of Pyrea from PyPI.
 
 ### API
 
+**Please note that Pyrea is work in progress. The API may change from version to version in the coming weeks, which may introduce breaking changes to legacy code.**
+
 In Pyrea, your data are organised in to views. A view consists of the data in the
 form of a 2D matrix, and an associated clustering algorithm (a _clusterer_).
 
@@ -126,7 +128,7 @@ import numpy as np
 hc1 = pyrea.clusterer('ward')
 hc2 = pyrea.clusterer('complete')
 # Fusers:
-parea_fuser = pyrea.fuser('parea')
+f = pyrea.fuser('parea')
 
 # Data (random data for now)
 d1 = np.random.rand(100,10)
@@ -148,7 +150,7 @@ view3_e2 = pyrea.view(d3, hc2)
 
 e2 = pyrea.ensemble([view1_e2, view2_e2, view3_e2], f, hc1)
 
-e3 = pyrea.ensemble([e1, e2], f, [c1, c2])
+e3 = pyrea.ensemble([e1, e2], f, [hc1, hc2])
 
 e3.execute()
 ```
@@ -174,7 +176,7 @@ d3 = np.random.rand(100,10)
 
 v1 = pyrea.view(d1, c1)
 v2 = pyrea.view(d2, c2)
-v3 = pyrea.view(d3, c3)
+v3 = pyrea.view(d3, c3)karlsbad
 
 e = pyrea.ensemble([v1, v2, v3], f, [c1, c2, c3])
 
