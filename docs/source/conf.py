@@ -16,6 +16,9 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 
+# Adds __init__() to docs
+autoclass_content = 'both'
+
 # Import Pyrea to get version information.
 import pyrea
 
@@ -84,6 +87,11 @@ pygments_style = None
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+#
+html_logo = 'logo.png'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
