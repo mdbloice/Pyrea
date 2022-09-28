@@ -43,18 +43,26 @@ class Fusion(object):
 
 
 class Parea(Fusion):
+    """
+    Parea fusion algorithm. THis functionality is not yet implemented.
+    """
     def __init__(self) -> None:
         super().__init__()
         raise Exception("Not yet implemented.")
 
-    def execute():
+    def execute(self, views: list) -> list:
+        """
+        Performs the fusion of a set of views.
+
+        Not yet implemented.
+        """
         pass
 
 
 class Disagreement(Fusion):
     def __init__(self) -> None:
         super().__init__()
-
+        pass
         # Check all views are of the same length
         #if not all(len(views[0]) == len(_) for _ in views):
         #    raise TypeError("The size of thew views must be equal.")
@@ -80,7 +88,8 @@ class Agreement(Fusion):
         super().__init__()
         pass
 
-    def execute(views: list):
+    # TODO: Rename as labels
+    def execute(self, views: list):
 
         n_samp  = len(views[0])
 
@@ -94,6 +103,37 @@ class Agreement(Fusion):
             labels = labels + res
 
         return labels
+
+
+class Consensus(Fusion):
+    def __init__(self) -> None:
+        super().__init__()
+        pass
+
+    def execute(self, views: list):
+
+        n_samp    = len(views[0])
+        cl_cons   = np.zeros((n_samp,), dtype=int)
+
+        n_cl = len(views)
+
+        k = 1
+        for xx in range(0, n_samp):
+
+            ids = np.where(views[0] == views[0][xx])
+
+            for yy in range(1, n_cl):
+
+                m = np.where(views[yy] == views[yy][xx])
+                ids = np.intersect1d(ids, m)
+
+            check = np.sum(cl_cons[ids])
+            if check == 0:
+                cl_cons[ids] = k
+                k = k + 1
+
+        return(cl_cons)
+
 
 class View(object):
     """
@@ -164,6 +204,7 @@ class View(object):
         self.header = header
         self._id = None  # Initially set to None, we give it an ID once added to workflow.
         self.labels = None
+        self.computed = False
 
     def summary(self) -> None:
         """
@@ -185,7 +226,7 @@ class View(object):
 
     def execute(self):
 
-        print("Running view.execute()...")
+        print("Executing view.execute()...")
         self.labels = self.clusterer.execute(self.data)
 
         return self.labels
@@ -197,7 +238,8 @@ class Ward(Clusterer):
 
     def execute(self, data):
 
-        return AgglomerativeClustering(linkage='ward').fit(data).labels_
+        # Change linkage for different types of clustering
+        return AgglomerativeClustering().fit(data).labels_
 
 
 class Complete(Clusterer):
@@ -211,28 +253,23 @@ class Complete(Clusterer):
 class Ensemble(object):
     def __init__(self, elements: list, fuser: Fusion, clusterers: list):
 
+        # TODO: check if all items are clusterers.
+        #if not isinstance(clusterers, list):
+        #    self.clusterers = [clusterers]
+        #else:
+        #    self.clusterers = clusterers
+
         self.elements = elements
         self.fuser = fuser
         self.clusterers = clusterers
-        self.clusters = []
-        self.labels = []
-        self.fusion_matrix = None
 
     def execute(self):
 
-        # Check if this ensemble contains further ensembles, or views.
-        # If we contain ensembles, we need to iterate over these and allow
-        # them to execute first. If they themselves contain ensembles the same
-        # will happen there.
+        labels = []
 
-        print ("Running ensemble.execute()...")
         for e in self.elements:
+            labels.append(e.execute())
 
-            self.clusters.append(e.execute())
+        fusion_matrix = self.fuser.execute(labels)
 
-        self.fusion_matrix = self.fuser.execute(self.clusters)
-
-        for c in self.clusterers:
-            self.labels.append(c.execute(self.fusion_matrix))
-
-        return self.labels[0]
+        return View(fusion_matrix, self.clusterers)
