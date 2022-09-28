@@ -11,8 +11,6 @@
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 
-from .fusion import disagreement
-
 
 class Clusterer(object):
     """
