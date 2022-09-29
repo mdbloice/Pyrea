@@ -6,7 +6,8 @@
 
 Multi-view clustering with flexible ensemble structures.
 
-_The name Pyrea is derived from the Greek word Parea, meaning a group of friends who gather to share experiences, values, and ideas._
+*The name Pyrea is derived from the Greek word Parea, meaning a group of
+friends who gather to share experiences, values, and ideas.*
 
 ![PyPI](https://img.shields.io/pypi/v/Pyrea) ![PyPI - License](https://img.shields.io/pypi/l/Pyrea) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Pyrea)
 
@@ -24,10 +25,12 @@ This will install the latest version of Pyrea from PyPI.
 
 ### API
 
-**Please note that Pyrea is work in progress. The API may change from version to version in the coming weeks, which may introduce breaking changes to legacy code.**
+**Please note that Pyrea is work in progress. The API may change from version
+to version in the coming weeks, which may introduce breaking changes to legacy
+code.**
 
-In Pyrea, your data are organised in to views. A view consists of the data in the
-form of a 2D matrix, and an associated clustering algorithm (a _clusterer_).
+In Pyrea, your data are organised in to views. A view consists of the data in
+the form of a 2D matrix, and an associated clustering algorithm (a *clusterer*).
 
 To create a view you must have some data, and a clusterer:
 
@@ -52,29 +55,25 @@ unique clusterer.
 As this is a library for multi-view ensemble learning, you will normally have
 multiple views.
 
-A fusion algorithm is therefore used to fused the clusters created from multiple
-views. Therefore, our next step is to create a *fuser* object:
+A fusion algorithm is therefore used to fuse the clusterings created from
+multiple views. Therefore, our next step is to create a *fuser* object:
 
 ```python
-f = pyrea.fuser('parea')
+f = pyrea.fuser('agreement')
 ```
 
-With you fusion algorithm `f`, you can create an *ensemble*. The ensemble is
-created with your views, the fusion algorithm, and a clustering algorithm:
+With you fusion algorithm `f`, you can execute an *ensemble*. The ensemble is
+created with a set of views, a fusion algorithm, and a clustering algorithm,
+and returns a new view:
 
 ```pythom
-e = pyrea.ensemble([v1, v2, v3], f, c)
+v_res = pyrea.execute_ensemble([v1, v2, v3], f, c)
 ```
 
-To perform this operation you execute the ensemble:
+This newly created view, `v_res` can subsequently be fed into another ensemble,
+allowing you to create stacked ensemble architectures, with high flexibility.
 
-```python
-e.execute()
-```
-
-which returns your clustered fusion matrix.
-
-A full example is shown below:
+A full example is shown below, using random data:
 
 ```python
 import pyrea
@@ -88,18 +87,15 @@ d2 = np.random.rand(1000,100)
 # algorithm for both views
 c = pyrea.clusterer('ward')
 
-# Create the views using the data and clusterer
+# Create the views using the data and the same clusterer
 v1 = pyrea.view(d1, c)
 v2 = pyrea.view(d1, c)
 
 # Create a fusion object
-f = pyrea.fuser('parea')
+f = pyrea.fuser('agreement')
 
-# Create your ensemble
-e = pyrea.ensemble([v1, v2], f, c)
-
-# Execute the ensemble
-e.execute()
+# Execute an ensemble based on your views, fusion algorithm, and clusterer
+v_res = pyrea.execute_ensemble([v1, v2], f, c)
 ```
 
 ## Ensemble Structures
@@ -109,53 +105,54 @@ For example, examine the two structures below:
 
 ![Ensemble Structures](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/parea.png)
 
-We will demonstrate how to create deep and flexible ensemble structures using the examples  a) and b) from the image above.
+We will demonstrate how to create deep and flexible ensemble structures using
+the examples  a) and b) from the image above.
 
 ### Example A
-This ensemble consists of two sets of three views, which are clustered, fused, and then once again combined in a second layer.
+This ensemble consists of two sets of three views, which are clustered, fused,
+and then once again combined in a second layer.
 
-**Work in progress**
-
-We create two ensembles, which represent the first layer of the structure A in the image above:
+We create two ensembles, which represent the first layer of structure a) in
+the image above:
 
 ```python
 import pyrea
 import numpy as np
 
-# Define our clustering algorithms(s) and fusion algorimth(s) first that we
-# will use multiple times.
 # Clusterers:
 hc1 = pyrea.clusterer('ward')
 hc2 = pyrea.clusterer('complete')
-# Fusers:
-f = pyrea.fuser('parea')
 
-# Data (random data for now)
+# Fusion algorithm:
+f = pyrea.fuser('agreement')
+
+# Create three random datasets
 d1 = np.random.rand(100,10)
 d2 = np.random.rand(100,10)
 d3 = np.random.rand(100,10)
 
 # Views for ensemble 1
-view1_e1 = pyrea.view(d1, hc1)
-view2_e1 = pyrea.view(d2, hc1)
-view3_e1 = pyrea.view(d3, hc1)
+v1 = pyrea.view(d1, hc1)
+v2 = pyrea.view(d2, hc1)
+v3 = pyrea.view(d3, hc1)
 
-# Ensemble 1
-e1 = pyrea.ensemble([view1_e1, view2_e1, view3_e1], f, hc1)
+# Execute ensemble 1 and retrieve a new view, which is used later.
+v_ensemble_1 = pyrea.execute_ensemble([v1, v2, v3], f, hc1)
 
 # Views for ensemble 2
-view1_e2 = pyrea.view(d1, hc2)
-view2_e2 = pyrea.view(d2, hc2)
-view3_e2 = pyrea.view(d3, hc2)
+v4 = pyrea.view(d1, hc2)
+v5 = pyrea.view(d2, hc2)
+v6 = pyrea.view(d3, hc2)
 
-e2 = pyrea.ensemble([view1_e2, view2_e2, view3_e2], f, hc1)
+# Execute our second ensemble, and retreive a new view:
+v_ensemble_2 = pyrea.execute_ensemble([v4, v5, v6], f, hc1)
 
-e3 = pyrea.ensemble([e1, e2], f, [hc1, hc2])
-
-e3.execute()
+# Now we can execute a further ensemble, using the views generated from the
+# two previous ensemble methods:
+v_final = pyrea.execute_ensemble([v_ensemble_1, v_ensemble_1], f, hc1)
 ```
 
-As for structure b) above, this can implemented as follows:
+As for structure b) in the image above, this can implemented as follows:
 
 ```python
 import pyrea
@@ -167,26 +164,17 @@ c2 = pyrea.clusterer('complete')
 c3 = pyrea.clusterer('single')
 
 # Fusion algorithm
-f = pyrea.fuser('disagreement')
+f = pyrea.fuser('agreement')
 
-# Data
-d1 = np.random.rand(100,10)
-d2 = np.random.rand(100,10)
-d3 = np.random.rand(100,10)
+# Create the views with the random data directly:
+v1 = pyrea.view(np.random.rand(100,10), c1)
+v2 = pyrea.view(np.random.rand(100,10), c2)
+v3 = pyrea.view(np.random.rand(100,10), c3)
 
-v1 = pyrea.view(d1, c1)
-v2 = pyrea.view(d2, c2)
-v3 = pyrea.view(d3, c3)karlsbad
-
-e = pyrea.ensemble([v1, v2, v3], f, [c1, c2, c3])
-
-e.execute()
+v_res = pyrea.execute_ensemble([v1, v2, v3], f, [c1, c2, c3])
 ```
 
-Notice how the ensemble is passed 3 clustering algorithms, and these are combined for a final clustering.
-
-## Deep Ensembles
-Pyrea can be used to create deep ensembles.
+Notice how the ensemble is passed 3 clustering algorithms `[c1, c2, c3]`, and these are combined for a final clustering.
 
 ## Extensible
 
@@ -195,10 +183,21 @@ Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusi
 By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.org/pyrea/extending.html#custom-clustering-algorithms) for details.
 
 # Work In Progress
-Several features described in the package's corresponding paper (see package citation) are not yet complete, these are described here.
+Several features are currently work in progress, future updates will include
+the features described in the sections below.
 
 ## Genetic Algorithm
-Pyrea can select the best clustering algorithms and fusion algorithms based on a genetic algorithm optimisation technique.
+Pyrea can select the best clustering algorithms and fusion algorithms based on
+a genetic algorithm optimisation technique.
 
 ## Parea Clustering Algorithm
-This functionality is work in progress and will be included soon.
+A novel fusion technique, developed by one of the authors of this software
+package, named HCfused, will be included soon in a future update.
+
+Details of the HCfused method can be found here:
+
+Pfeifer, Bastian, and Michael G. Schimek. "A hierarchical clustering and data
+fusion approach for disease subtype discovery." Journal of Biomedical
+Informatics 113 (2021): 103636.
+
+<https://www.sciencedirect.com/science/article/pii/S1532046420302641>
