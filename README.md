@@ -190,7 +190,7 @@ the features described in the sections below.
 Pyrea can select the best clustering algorithms and fusion algorithms based on
 a genetic algorithm optimisation technique.
 
-## Parea Clustering Algorithm
+## HCfused Clustering Algorithm
 A novel fusion technique, developed by one of the authors of this software
 package, named HCfused, will be included soon in a future update.
 
