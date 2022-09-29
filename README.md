@@ -180,7 +180,7 @@ Notice how the ensemble is passed 3 clustering algorithms `[c1, c2, c3]`, and th
 
 Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusion techniques with custom clustering algorithms that can be loaded in to Pyrea at run-time.
 
-By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.org/pyrea/extending.html#custom-clustering-algorithms) for details.
+By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.io/pyrea/extending.html#custom-clustering-algorithms) for details.
 
 # Work In Progress
 Several features are currently work in progress, future updates will include
