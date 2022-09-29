@@ -196,8 +196,8 @@ package, named HCfused, will be included soon in a future update.
 
 Details of the HCfused method can be found here:
 
-Pfeifer, Bastian, and Michael G. Schimek. "A hierarchical clustering and data
-fusion approach for disease subtype discovery." Journal of Biomedical
-Informatics 113 (2021): 103636.
+Pfeifer, Bastian, and Schimek, Michael G. "A hierarchical clustering and data
+fusion approach for disease subtype discovery" *Journal of Biomedical
+Informatics* **113** (2021): 103636.
 
 <https://www.sciencedirect.com/science/article/pii/S1532046420302641>
