@@ -2,7 +2,14 @@
 # Copyright (C) 2022 Marcus D. Bloice, Bastian Pfeifer
 #
 # Licenced under the terms of the MIT license.
+"""
+The :py:mod:`pyrea.core` module contains all the user-facing API functions
+required to use Pyrea. Generally, users will only need to interact with the
+functions within this module in order to create their ensemble structures.
 
+Developers, especially those who wish to extend Pyrea, may want to look at the
+classes and functions defined in the :py:mod:`pyrea.structure` module.
+"""
 from array import array
 from cmath import exp
 from typing import List
@@ -14,9 +21,9 @@ FUSION_METHODS = ['agreement', 'consensus', 'disagreenent']
 
 def clusterer(clusterer: str, n_clusters: int=2) -> Clusterer:
     """
-    Creates a :class:`~pyrea.structure.Clusterer` object to be used when 
-    creating a :class:`~pyrea.structure.View` or 
-    :class:`~pyrea.structure.Ensemble`. Can be one of: average, complete, 
+    Creates a :class:`~pyrea.structure.Clusterer` object to be used when
+    creating a :class:`~pyrea.structure.View` or
+    :class:`~pyrea.structure.Ensemble`. Can be one of: average, complete,
     random, single, or ward.
 
     .. code::
@@ -106,13 +113,13 @@ def execute_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clustere
 
     .. code::
 
-        v = pyrea.execute([view1, view2, view3], fusion, clusterer)
+        v = pyrea.execute_ensemble([view1, view2, view3], fusion, clusterer)
 
-    Returns a :class:`View` object which can consequently be included in a
+    Returns a :class:`~pyrea.structure.View` object which can consequently be included in a
     further ensemble.
 
     .. seealso:: The :func:`~view` function.
-    .. seealso:: The :func:`~cluster` function.
+    .. seealso:: The :func:`~clusterer` function.
 
     """
     if not isinstance(views, list):
@@ -120,10 +127,10 @@ def execute_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clustere
 
     return Ensemble(views, fuser, clusterers).execute()
 
-def get_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) -> View:
+def get_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) -> Ensemble:
     """
-    Creates an ensemble which must be executed later to get the ensemble's
-    computed view.
+    Creates and returns an :class:`~pyrea.structure.Ensemble` object which must
+    be executed later to get the ensemble's computed view.
     """
     if not isinstance(views, list):
         raise TypeError("Parameter 'views' must be a list of Views. You provided %s" % type(views))
@@ -132,14 +139,16 @@ def get_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) 
 
 def summary():
     """
-    Prints a summary of the current pipeline, including any already calculated
-    statistics.
+    Not yet implemented.
+
+    Prints a summary of the current ensemble structure, including any 
+    already calculated statistics.
     """
     title = "Summary Statistics"
     print(f" {title.title()} ".center(80, '*'))
 
     print("\n")
-    print(f"Summary statistics to appear here".center(80))
+    print(f"Not yet implemented".center(80))
     print("\n")
 
     print(f" End Summary ".center(80, "*"))
