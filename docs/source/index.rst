@@ -83,31 +83,30 @@ we provide here the source code to implement this method:
 
    import pyrea
 
-   c1 = pyrea.cluster.KMeans()
-   c2 = pyrea.cluster.XYZ()
-   c3 = pyrea.cluster.XYZ()
+   c1 = pyrea.clusterer('ward')
+   c2 = pyrea.clusterer('complete')
+   c3 = pyrea.clusterer('single')
 
    # Make some datasets
-   d1 = np.random.rand(3,3)
-   d2 = np.random.rand(3,3)
-   d3 = np.random.rand(3,3)
+   d1 = np.random.rand(100,10)
+   d2 = np.random.rand(100,10)
+   d3 = np.random.rand(100,10)
 
    # A view consists of a dataset (2d array/matrix) and a clustering algorithm
-   v1 = pyrea.View(d1, c1)
-   v2 = pyrea.View(d2, c2)
-   v3 = pyrea.View(d3, c3)
+   v1 = pyrea.view(d1, c1)
+   v2 = pyrea.view(d2, c2)
+   v3 = pyrea.view(d3, c3)
 
-   # A fuser is instantiated with a clustering algorithm also
-   f = pyrea.fusion.consensus(c1)
+   # Create a fusion algorithm object
+   f = pyrea.fuser('agreement')
 
-   # An ensemble consists of views and a fusion algorithm:
-   e1 = Ensemble([v1,v2,v3], f)
-   e2 = Ensemble([v1,v2,v3], f)
+   # An ensemble consists of views and a fusion algorithm,
+   # and once executed returns a new view
+   v_res_1 = pyrea.execute_ensemble([v1,v2,v3], f, c1)
+   v_res_2 = pyrea.execute_ensemble([v1,v2,v3], f, c1)
 
-   # An ensemble can also be made from ensembles instead of views
-   e3 = Ensemble([e1, e2], f)
-
-   e3.execute()  # returns a final cluster
+   # These views can then be used to create another emsemble
+   v_final = pyrea.execute_ensemble([v_res_1, v_res_2], f, c)
 
 For complete documentation of all modules, classes, and functions, see the sections below.
 
