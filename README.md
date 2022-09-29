@@ -182,7 +182,7 @@ Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusi
 
 By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.io/pyrea/extending.html#custom-clustering-algorithms) for details.
 
-# Work In Progress
+# Work In Progress and Future Work
 Several features are currently work in progress, future updates will include
 the features described in the sections below.
 
