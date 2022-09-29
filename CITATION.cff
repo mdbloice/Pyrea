@@ -3,22 +3,9 @@ message: "If you use this software, please cite it as below."
 authors:
 - family-names: "Bloice"
   given-names: "Marcus D."
-  orcid: "https://orcid.org/0000-0000-0000-0000"
 - family-names: "Pfeifer"
   given-names: "Bastian"
 title: "Pyrea"
 version: 1.0.2
 date-released: 2022-09-29
 url: "https://github.com/mdbloice/Pyrea"
-preferred-citation:
-  type: article
-  authors:
-  - family-names: "Pfeifer"
-    given-names: "Bastian"
-  - family-names: "Schimeck"
-    given-names: "Michael G."
-  doi: "10.1016/j.jbi.2020.103636"
-  journal: "Journal of Biomedical Informatics"
-  title: "A hierarchical clustering and data fusion approach for disease subtype discovery"
-  volume: 113
-  year: 2021
