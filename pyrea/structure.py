@@ -24,12 +24,9 @@ from typing import List
 
 class Clusterer(object):
     """
-    Abstract Base Class for all clustering algorithms.
-
+    :class:`Clusterer` is the Abstract Base Class for all clustering algorithms.
     All clustering algorithms must be a subclass of this class in order to
-    accepted by functions such as :func:`pyrea.core.execute_ensemble()` and
-    so on.
-
+    accepted by functions such as :func:`~pyrea.core.execute_ensemble()`.
     To extend Pyrea with a custom clustering algorithm, create a new
     class that is a subclass of :class:`Clusterer`, and implement the
     :func:`Clusterer.execute` function.
@@ -47,12 +44,9 @@ class Clusterer(object):
 class Fusion(object):
     def __init__(self) -> None:
         """
-        Abstract Base Class for all fusion algorithms.
-
+        :class:`Fusion` is the Abstract Base Class for all fusion algorithms.
         All fusion algorithms must be a subclass of this class in order to
-        accepted by functions such as :func:`pyrea.core.execute_ensemble()` and
-        so on.
-
+        accepted by functions such as :func:`~pyrea.core.execute_ensemble()`.
         To extend Pyrea with a custom fusion algorithm, create a new
         class that is a subclass of :class:`Fusion`, and implement the
         :func:`Fusion.execute` function.
@@ -272,7 +266,35 @@ class Complete(Clusterer):
         """
         Perform the clustering and return the results.
         """
+        return AgglomerativeClustering(linkage='complete').fit(data).labels_
+
+
+class Average(Clusterer):
+    """
+    Implements the 'average' clustering algorithm.
+    """
+    def __init__(self) -> None:
+        super().__init__()
+
+    def execute(self, data):
+        """
+        Perform the clustering and return the results.
+        """
         return AgglomerativeClustering(linkage='average').fit(data).labels_
+
+
+class Single(Clusterer):
+    """
+    Implements the 'single' clustering algorithm.
+    """
+    def __init__(self) -> None:
+        super().__init__()
+
+    def execute(self, data):
+        """
+        Perform the clustering and return the results.
+        """
+        return AgglomerativeClustering(linkage='single').fit(data).labels_
 
 
 class Ensemble(object):

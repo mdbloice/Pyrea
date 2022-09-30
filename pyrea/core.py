@@ -14,7 +14,7 @@ from array import array
 from cmath import exp
 from typing import List
 
-from .structure import Agreement, Clusterer, Complete, Disagreement, Ensemble, Fusion, View, Ward, Consensus
+from .structure import Agreement, Average, Clusterer, Complete, Disagreement, Ensemble, Fusion, View, Ward, Consensus, Single
 
 CLUSTER_METHODS = ['average', 'complete', 'random', 'single', 'ward']
 FUSION_METHODS = ['agreement', 'consensus', 'disagreenent']
@@ -57,8 +57,12 @@ def clusterer(clusterer: str, n_clusters: int=2) -> Clusterer:
         return Ward()
     elif clusterer == 'complete':
         return Complete()
+    elif clusterer == 'single':
+        return Single()
+    elif clusterer == 'average':
+        return Average()
     else:
-        return None # Will never get here unless things go very wrong indeed
+        raise ValueError("Unknown clustering method.")
 
 def view(data: array, clusterer: Clusterer) -> View:
     """
@@ -102,6 +106,7 @@ def fuser(fuser: str):
     elif fuser == "consensus":
         return Consensus()
 
+
 def execute_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) -> View:
     """
     Executes an ensemble and returns a new :class:`View` object.
@@ -141,7 +146,7 @@ def summary():
     """
     Not yet implemented.
 
-    Prints a summary of the current ensemble structure, including any 
+    Prints a summary of the current ensemble structure, including any
     already calculated statistics.
     """
     title = "Summary Statistics"
