@@ -306,10 +306,21 @@ class Ensemble(object):
     :param fuser: The fusion algorithm to use.
     :param clusterers: The clustering algorithms to use on the fused matrix.
     """
-    def __init__(self, elements: list, fuser: Fusion, clusterers: list):
-        self.elements = elements
+    def __init__(self, views: List[View], fuser: Fusion, clusterers: List[Clusterer]):
+        
+        if isinstance(views, View):
+            self.views = [views]
+        elif isinstance(views, list):
+            self.views = views
+
+        if isinstance(clusterers, Clusterer):
+            self.clusterers = [clusterers]
+        elif isinstance(clusterers, list):
+            self.clusterers = clusterers
+
         self.fuser = fuser
-        self.clusterers = clusterers
+        self.labels = []
+        self.computed_views = []
 
     def execute(self) -> View:
         """
@@ -317,11 +328,19 @@ class Ensemble(object):
 
         The new :class:`View` can then be passed to subsequent ensembles.
         """
-        labels = []
 
-        for e in self.elements:
-            labels.append(e.execute())
+        # Execute each view's clustering algorithm on its data
+        for v in self.views:
+            self.labels.append(v.execute())
 
-        fusion_matrix = self.fuser.execute(labels)
+        # Fuse the clusterings to a single fused matrix
+        fusion_matrix = self.fuser.execute(self.labels)
 
-        return View(fusion_matrix, self.clusterers)
+        # Make new views with the fused matrix as data and the 
+        # clutering algorithms that were passed.
+        for i in range(len(self.clusterers)):
+            self.computed_views.append(View(fusion_matrix, self.clusterers[i]))
+
+        # Return the new view(s). Multiple views are returned if 
+        # multiple clusters were specified.
+        return self.computed_views
