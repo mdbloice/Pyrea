@@ -45,13 +45,13 @@ def clusterer(clusterer: str, n_clusters: int=2) -> Clusterer:
      'complete', 'random', 'single', or 'ward'.
     :param n_clusters: The number of clusters to find. Default=2.
     """
-    #if not isinstance(clusterer, str):
-    #    raise TypeError("Parameter 'clusterer' must be of type string. Choices available are: %s."
-    #                    % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
+    if not isinstance(clusterer, str):
+        raise TypeError("Parameter 'clusterer' must be of type string. Choices available are: %s."
+                        % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
 
-    #if clusterer not in CLUSTER_METHODS:
-        #raise TypeError("Parameter 'clusterer' must be one of %s and you passed '%s'."
-         #               % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clusterer))
+    if clusterer not in CLUSTER_METHODS:
+        raise TypeError("Parameter 'clusterer' must be one of %s and you passed '%s'."
+                        % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clusterer))
 
     if clusterer == 'ward':
         return Ward()
