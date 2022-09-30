@@ -25,7 +25,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='pyrea',
-    version='1.0.4',
+    version='1.0.5',
     author='Marcus D. Bloice, Bastian Pfeifer',
     license='MIT',
     author_email='marcus.bloice@medunigraz.at',
