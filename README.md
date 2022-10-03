@@ -194,10 +194,8 @@ a genetic algorithm optimisation technique.
 A novel fusion technique, developed by one of the authors of this software
 package, named HCfused, will be included soon in a future update.
 
-Details of the HCfused method can be found here:
+# Citing
 
-Pfeifer, Bastian, and Schimek, Michael G. "A hierarchical clustering and data
-fusion approach for disease subtype discovery" *Journal of Biomedical
-Informatics* **113** (2021): 103636.
+If you find this package useful and wish to cite it, please use the following:
 
-<https://www.sciencedirect.com/science/article/pii/S1532046420302641>
+Pfeifer, B., Bloice, M., & Schimek, M. (2022). Parea: multi-view ensemble clustering for cancer subtype discovery. arXiv.
