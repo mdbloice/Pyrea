@@ -168,7 +168,15 @@ class Consensus(Fusion):
                 cl_cons[ids] = k
                 k = k + 1
 
-        return(cl_cons)
+        # Calculate binary matrix
+        mat_bin   = np.zeros((n_samp, n_samp), dtype=int)
+        for xx in range(0, n_samp):
+
+            ids = np.where(cl_cons == cl_cons[xx])
+            mat_bin[xx, ids] = 1
+            mat_bin[ids, xx] = 1
+
+        return(mat_bin)
 
 
 class View(object):
@@ -307,7 +315,7 @@ class Ensemble(object):
     :param clusterers: The clustering algorithms to use on the fused matrix.
     """
     def __init__(self, views: List[View], fuser: Fusion, clusterers: List[Clusterer]):
-        
+
         if isinstance(views, View):
             self.views = [views]
         elif isinstance(views, list):
@@ -336,11 +344,11 @@ class Ensemble(object):
         # Fuse the clusterings to a single fused matrix
         fusion_matrix = self.fuser.execute(self.labels)
 
-        # Make new views with the fused matrix as data and the 
+        # Make new views with the fused matrix as data and the
         # clutering algorithms that were passed.
         for i in range(len(self.clusterers)):
             self.computed_views.append(View(fusion_matrix, self.clusterers[i]))
 
-        # Return the new view(s). Multiple views are returned if 
+        # Return the new view(s). Multiple views are returned if
         # multiple clusters were specified.
         return self.computed_views
