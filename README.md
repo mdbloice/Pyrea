@@ -198,4 +198,4 @@ package, named HCfused, will be included soon in a future update.
 
 If you find this package useful and wish to cite it, please use the following:
 
-Pfeifer, B., Bloice, M., & Schimek, M. (2022). Parea: multi-view ensemble clustering for cancer subtype discovery. arXiv. <https://arxiv.org/abs/2209.15399>
+Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2022). Parea: multi-view ensemble clustering for cancer subtype discovery. arXiv. <https://arxiv.org/abs/2209.15399>
