@@ -34,11 +34,40 @@ class Clusterer(object):
     def __init__(self) -> None:
         pass
 
-    def execute(self, data: list) -> list:
+    def execute(self) -> list:
         """
         Execute the clustering algorithm with the given :attr:`data`.
         """
         pass
+
+
+class AgglomerativeClusteringPyrea(Clusterer):
+    def __init__(self, n_clusters=2, linkage='ward', affinity='euclidean', memory=None, connectivity=None, compute_full_tree='auto', distance_threshold=None,compute_distances=False) -> None:
+        """
+
+        See https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html
+
+        """
+        super().__init__()
+        self.n_clusters = n_clusters
+        self.linkage = linkage
+        self.affinity = affinity
+        self.memory = memory
+        self.connectivity = connectivity
+        self.compute_full_tree = compute_full_tree
+        self.distance_threshold = distance_threshold
+        self.compute_distances = compute_distances
+
+    def execute(self, data: list) -> list:
+        super().execute()
+        return AgglomerativeClustering(n_clusters = self.n_clusters, 
+                                        linkage=self.linkage, 
+                                        affinity=self.affinity, 
+                                        memory=self.memory, 
+                                        connectivity=self.connectivity, 
+                                        compute_full_tree=self.compute_full_tree, 
+                                        distance_threshold=self.distance_threshold, 
+                                        compute_distances=self.compute_distances).fit(data).labels_
 
 
 class Fusion(object):
