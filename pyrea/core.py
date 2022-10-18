@@ -16,10 +16,10 @@ from typing import List
 
 from .structure import Agreement, Average, Clusterer, Complete, Disagreement, Ensemble, Fusion, View, Ward, Consensus, Single
 
-CLUSTER_METHODS = ['average', 'complete', 'random', 'single', 'ward']
-FUSION_METHODS = ['agreement', 'consensus', 'disagreenent']
+CLUSTER_METHODS = ['spectral', 'agglomerative', 'dbscan', 'optics']
+FUSION_METHODS = ['agreement', 'consensus', 'disagreement']
 
-def clusterer(clusterer: str, n_clusters: int=2) -> Clusterer:
+def clusterer(clusterer: str, **kwargs) -> Clusterer:
     """
     Creates a :class:`~pyrea.structure.Clusterer` object to be used when
     creating a :class:`~pyrea.structure.View` or
@@ -45,7 +45,7 @@ def clusterer(clusterer: str, n_clusters: int=2) -> Clusterer:
      'complete', 'random', 'single', or 'ward'.
     :param n_clusters: The number of clusters to find. Default=2.
     """
-    if not isinstance(clusterer, str):
+    if not isinstance(clusterer, str, **kwargs):
         raise TypeError("Parameter 'clusterer' must be of type string. Choices available are: %s."
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
 
@@ -53,7 +53,7 @@ def clusterer(clusterer: str, n_clusters: int=2) -> Clusterer:
         raise TypeError("Parameter 'clusterer' must be one of %s and you passed '%s'."
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clusterer))
 
-    if clusterer == 'ward':
+    if clusterer == 'spectral':
         return Ward()
     elif clusterer == 'complete':
         return Complete()
@@ -84,7 +84,7 @@ def view(data: array, clusterer: Clusterer) -> View:
 
 def fuser(fuser: str):
     """
-    Creates a :class:`Fusion` object, which is used to fuse the results of 
+    Creates a :class:`Fusion` object, which is used to fuse the results of
     an arbitrarily long list of clusterings.
 
     .. code::

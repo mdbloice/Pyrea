@@ -18,9 +18,10 @@ base class for example. The :class:`Fusion` class is another such abstract base
 class that must be used if a developer wishes to create a custom fusion
 algorithm for use within Pyrea.
 """
+from atexit import _ncallbacks
 import numpy as np
-from sklearn.cluster import AgglomerativeClustering
-from typing import List
+from sklearn.cluster import AgglomerativeClustering, SpectralClustering, DBSCAN, OPTICS
+from typing import List, Union, Any
 
 class Clusterer(object):
     """
@@ -42,8 +43,17 @@ class Clusterer(object):
 
 
 class AgglomerativeClusteringPyrea(Clusterer):
-    def __init__(self, n_clusters=2, linkage='ward', affinity='euclidean', memory=None, connectivity=None, compute_full_tree='auto', distance_threshold=None,compute_distances=False) -> None:
+    def __init__(self, n_clusters=2,
+                       linkage: str='ward',
+                       affinity='euclidean',
+                       memory: Union[None, Any]=None,
+                       connectivity=None,
+                       compute_full_tree='auto',
+                       distance_threshold=None,
+                       compute_distances=False) -> None:
         """
+        Perform agglomerative clustering.
+
 
         See https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html
 
@@ -60,14 +70,151 @@ class AgglomerativeClusteringPyrea(Clusterer):
 
     def execute(self, data: list) -> list:
         super().execute()
-        return AgglomerativeClustering(n_clusters = self.n_clusters, 
-                                        linkage=self.linkage, 
-                                        affinity=self.affinity, 
-                                        memory=self.memory, 
-                                        connectivity=self.connectivity, 
-                                        compute_full_tree=self.compute_full_tree, 
-                                        distance_threshold=self.distance_threshold, 
-                                        compute_distances=self.compute_distances).fit(data).labels_
+        return AgglomerativeClustering(n_clusters = self.n_clusters,
+                                       linkage=self.linkage,
+                                       affinity=self.affinity,
+                                       memory=self.memory,
+                                       connectivity=self.connectivity,
+                                       compute_full_tree=self.compute_full_tree,
+                                       distance_threshold=self.distance_threshold,
+                                       compute_distances=self.compute_distances).fit(data).labels_
+
+
+class SpectralClusteringPyrea(Clusterer):
+    def __init__(self, n_clusters=8,
+                       eigen_solver=None,
+                       n_components=None,
+                       random_state=None,
+                       n_init=10,
+                       gamma=1.0,
+                       affinity='rbf',
+                       n_neighbors=10,
+                       eigen_tol=0.0,
+                       assign_labels='kmeans',
+                       degree=3,
+                       coef0=1,
+                       kernel_params=None,
+                       n_jobs=None,
+                       verbose=False) -> None:
+        """
+        Perform spectral clustering.
+
+        See: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html
+        """
+        super().__init__()
+        self.n_clusters = n_clusters
+        self.eigen_solver = eigen_solver
+        self.n_components = n_components
+        self.random_state = random_state
+        self.n_init = n_init
+        self.gamma = gamma
+        self.affinity = affinity
+        self.n_neighbors = n_neighbors
+        self.eigen_tol = eigen_tol
+        self.assign_labels = assign_labels
+        self.degree = degree
+        self.coef0 = coef0
+        self.kernel_params = kernel_params
+        self.n_jobs = n_jobs
+        self.verbose = verbose
+
+        def execute(self, data: list) -> list:
+            return SpectralClustering(n_clusters=self.n_clusters,
+                                      eigen_solver=self.eigen_solver,
+                                      n_components=self.n_components,
+                                      random_state=self.random_state,
+                                      n_init=self.n_init,
+                                      gamma=self.gamma,
+                                      affinity=self.affinity,
+                                      n_neighbors=self.n_neighbors,
+                                      eigen_tol=self.eigen_tol,
+                                      assign_labels=self.assign_labels,
+                                      degree=self.degree,
+                                      coef0=self.coef0,
+                                      kernel_params=self.kernel_params,
+                                      n_jobs=self.n_jobs,
+                                      verbose=self.verbose).fit().labels_
+
+
+class DBSCANPyrea(Clusterer):
+    def __init__(self, eps=0.5,
+                       min_samples=5,
+                       metric='euclidean',
+                       metric_params=None,
+                       algorithm='auto',
+                       leaf_size=30,
+                       p=None,
+                       n_jobs=None) -> None:
+        super().__init__()
+
+        self.eps = eps
+        self.min_samples = min_samples
+        self.metric = metric
+        self.metric_params = metric_params
+        self.algorithm = algorithm
+        self.leaf_size = leaf_size
+        self.p = p
+        self.n_jobs = n_jobs
+
+    def execute(self, data) -> list:
+        DBSCAN(eps=self.eps,
+               min_samples=self.min_samples,
+               metric=self.metric,
+               metric_params=self.metric_params,
+               algorithm=self.algorithm,
+               leaf_size=self.leaf_size,
+               p=self.p,
+               n_jobs=self.n_jobs).fit(data).labels_
+
+
+class OPTICSPyrea(Clusterer):
+    def __init__(self, min_samples=5,
+                       max_eps=np.inf,
+                       metric='minkowski',
+                       p=2,
+                       metric_params=None,
+                       cluster_method='xi',
+                       eps=None,
+                       xi=0.05,
+                       predecessor_correction=True,
+                       min_cluster_size=None,
+                       algorithm='auto',
+                       leaf_size=30,
+                       # memory=None,
+                       n_jobs=None) -> None:
+        super().__init__()
+        self.max_eps = max_eps
+        self.min_samples = min_samples
+        self.min_cluster_size = min_cluster_size
+        self.algorithm = algorithm
+        self.metric = metric
+        self.metric_params = metric_params
+        self.p = p
+        self.leaf_size = leaf_size
+        self.cluster_method = cluster_method
+        self.eps = eps
+        self.xi = xi
+        self.predecessor_correction = predecessor_correction
+        # self.memory = memory
+        self.n_jobs = n_jobs
+
+    def execute(self, data: list) -> list:
+
+        return OPTICS(max_eps=self.max_eps,
+                      min_samples=self.min_samples,
+                      min_cluster_size=self.min_cluster_size,
+                      algorithm=self.algorithm,
+                      metric=self.metric,
+                      metric_params=self.metric_params,
+                      p=self.p,
+                      leaf_size=self.leaf_size,
+                      cluster_method=self.cluster_method,
+                      eps=self.eps,
+                      xi=self.xi,
+                      predecessor_correction=self.predecessor_correction,
+                      # memory = self.memory,
+                      n_jobs=self.n_jobs
+                      ).fit(data).labels_
 
 
 class Fusion(object):
