@@ -14,7 +14,7 @@ from array import array
 from cmath import exp
 from typing import List
 
-from .structure import Agreement, Average, Clusterer, Complete, Disagreement, Ensemble, Fusion, View, Ward, Consensus, Single
+from .structure import AgglomerativeClusteringPyrea, Agreement, Clusterer, DBSCANPyrea, Disagreement, Ensemble, Fusion, OPTICSPyrea, SpectralClusteringPyrea, View, Consensus
 
 CLUSTER_METHODS = ['spectral', 'agglomerative', 'dbscan', 'optics']
 FUSION_METHODS = ['agreement', 'consensus', 'disagreement']
@@ -45,22 +45,22 @@ def clusterer(clusterer: str, **kwargs) -> Clusterer:
      'complete', 'random', 'single', or 'ward'.
     :param n_clusters: The number of clusters to find. Default=2.
     """
-    if not isinstance(clusterer, str, **kwargs):
+    if not isinstance(clusterer, str):
         raise TypeError("Parameter 'clusterer' must be of type string. Choices available are: %s."
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'"))
 
     if clusterer not in CLUSTER_METHODS:
-        raise TypeError("Parameter 'clusterer' must be one of %s and you passed '%s'."
+        raise TypeError("Parameter 'clusterer' must be one of %s: you passed '%s'."
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clusterer))
 
     if clusterer == 'spectral':
-        return Ward()
-    elif clusterer == 'complete':
-        return Complete()
-    elif clusterer == 'single':
-        return Single()
-    elif clusterer == 'average':
-        return Average()
+        return SpectralClusteringPyrea(**kwargs)
+    elif clusterer == 'agglomerative':
+        return AgglomerativeClusteringPyrea(**kwargs)
+    elif clusterer == 'dbscan':
+        return DBSCANPyrea(**kwargs)
+    elif clusterer == 'optics':
+        return OPTICSPyrea(**kwargs)
     else:
         raise ValueError("Unknown clustering method.")
 
