@@ -43,7 +43,7 @@ d = [[1,2,3],
      [7,8,9]]
 
 # Create a clusterer
-c = pyrea.clusterer("ward")
+c = pyrea.clusterer("agglomerative", n_clusters=2)
 
 v = pyrea.view(d, c)
 ```
@@ -51,6 +51,8 @@ v = pyrea.view(d, c)
 You now have a view `v`, containing the data `d` using the clustering algorithm
 `c`. Note that many views can share the same clusterer, or each view may have a
 unique clusterer.
+
+The clustering algorithm can be either 'spectral', 'agglomerative', 'dbscan', or 'optics'. See the documentation for a complete list of parameters that can be passed when creating a clusterer.
 
 As this is a library for multi-view ensemble learning, you will normally have
 multiple views.
@@ -84,8 +86,8 @@ d1 = np.random.rand(1000,100)
 d2 = np.random.rand(1000,100)
 
 # Define the clustering algorithm(s) you want to use. In this case we used the same
-# algorithm for both views
-c = pyrea.clusterer('ward')
+# algorithm for both views. By default n_clusters=2.
+c = pyrea.clusterer('agglomerative', n_clusters=2)
 
 # Create the views using the data and the same clusterer
 v1 = pyrea.view(d1, c)
@@ -120,8 +122,8 @@ import pyrea
 import numpy as np
 
 # Clusterers:
-hc1 = pyrea.clusterer('ward')
-hc2 = pyrea.clusterer('complete')
+hc1 = pyrea.clusterer('agglomerative', linkage='ward')
+hc2 = pyrea.clusterer('agglomerative', linkage='complete')
 
 # Fusion algorithm:
 f = pyrea.fuser('agreement')
@@ -159,9 +161,9 @@ import pyrea
 import numpy as np
 
 # Clustering algorithms
-c1 = pyrea.clusterer('ward')
-c2 = pyrea.clusterer('complete')
-c3 = pyrea.clusterer('single')
+c1 = pyrea.clusterer('agglomerative', linkage='ward')
+c2 = pyrea.clusterer('agglomerative', linkage='complete')
+c3 = pyrea.clusterer('agglomerative', linkage='single')
 
 # Fusion algorithm
 f = pyrea.fuser('agreement')
