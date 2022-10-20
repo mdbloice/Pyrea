@@ -13,13 +13,14 @@ classes and functions defined in the :py:mod:`pyrea.structure` module.
 from array import array
 from cmath import exp
 from typing import List
+import numpy as np
 
 from .structure import AgglomerativeClusteringPyrea, Agreement, Clusterer, DBSCANPyrea, Disagreement, Ensemble, Fusion, OPTICSPyrea, SpectralClusteringPyrea, View, Consensus
 
 CLUSTER_METHODS = ['spectral', 'agglomerative', 'dbscan', 'optics']
 FUSION_METHODS = ['agreement', 'consensus', 'disagreement']
 
-def clusterer(clusterer: str, **kwargs) -> Clusterer:
+def clusterer(clusterer: str, precomputed: bool=False, **kwargs) -> Clusterer:
     """
     Creates a :class:`~pyrea.structure.Clusterer` object to be used when
     creating a :class:`~pyrea.structure.View` or
@@ -28,7 +29,7 @@ def clusterer(clusterer: str, **kwargs) -> Clusterer:
 
     .. code::
 
-        c = pyrea.clusterer('ward', n_clusters=2)
+        c = pyrea.clusterer('agglomerative', n_clusters=2)
 
     Then, :attr:`c` can be used when creating a view or executing an ensemble:
 
@@ -54,13 +55,29 @@ def clusterer(clusterer: str, **kwargs) -> Clusterer:
                         % ("'" + "', '".join(CLUSTER_METHODS[:-1]) + "', or '" + CLUSTER_METHODS[-1] + "'", clusterer))
 
     if clusterer == 'spectral':
+        if precomputed:
+            kwargs['affinity'] = 'precomputed'
+
         return SpectralClusteringPyrea(**kwargs)
+
     elif clusterer == 'agglomerative':
+        if precomputed:
+            kwargs['affinity'] = 'precomputed'
+
         return AgglomerativeClusteringPyrea(**kwargs)
+
     elif clusterer == 'dbscan':
+        if precomputed:
+            kwargs['metric']='precomputed'
+
         return DBSCANPyrea(**kwargs)
+
     elif clusterer == 'optics':
+        if precomputed:
+            kwargs['metric']='precomputed'
+
         return OPTICSPyrea(**kwargs)
+
     else:
         raise ValueError("Unknown clustering method.")
 
@@ -105,7 +122,7 @@ def fuser(fuser: str):
         return Consensus()
 
 
-def execute_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) -> View:
+def execute_ensemble(views: List[View], fuser: Fusion) -> list:
     """
     Executes an ensemble and returns a new :class:`View` object.
 
@@ -128,7 +145,7 @@ def execute_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clustere
     if not isinstance(views, list):
         raise TypeError("Parameter 'views' must be a list of Views. You provided %s" % type(views))
 
-    return Ensemble(views, fuser, clusterers).execute()
+    return Ensemble(views, fuser).execute()
 
 def get_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) -> Ensemble:
     """
@@ -139,6 +156,35 @@ def get_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) 
         raise TypeError("Parameter 'views' must be a list of Views. You provided %s" % type(views))
 
     return Ensemble(views, fuser, clusterers)
+
+def consensus(labels: list):
+    """
+
+    """
+    if len(labels) <= 1:
+        raise ValueError("You must provide a list of labellings of length >= 2.")
+
+    n_samp    = len(labels[0])
+    cl_cons   = np.zeros((n_samp,), dtype=int)
+    n_cl = len(labels)
+
+    k = 1
+
+    for i in range(0, n_samp):
+
+        ids = np.where(labels[0] == labels[0][i])
+
+        for j in range(1, n_cl):
+
+            m = np.where(labels[j] == labels[j][i])
+            ids = np.intersect1d(ids, m)
+
+        check = np.sum(cl_cons[ids])
+        if check == 0:
+            cl_cons[ids] = k
+            k = k + 1
+
+    return cl_cons
 
 def summary():
     """

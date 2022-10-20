@@ -18,10 +18,10 @@ base class for example. The :class:`Fusion` class is another such abstract base
 class that must be used if a developer wishes to create a custom fusion
 algorithm for use within Pyrea.
 """
-from atexit import _ncallbacks
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering, SpectralClustering, DBSCAN, OPTICS
 from typing import List, Union, Any
+from scipy.cluster import hierarchy
 
 class Clusterer(object):
     """
@@ -40,6 +40,17 @@ class Clusterer(object):
         Execute the clustering algorithm with the given :attr:`data`.
         """
         pass
+
+
+class HierarchicalClustering(Clusterer):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def execute(self) -> list:
+        super().execute()
+
+        #X = scipy.spatial.distance.pdist(X, metric='euclidean', *, out=None, **kwargs)
+        #Dist = scipy.spatial.distance.pdist(X, metric='euclidean', *, out=None, **kwargs)
 
 
 class AgglomerativeClusteringPyrea(Clusterer):
@@ -195,7 +206,7 @@ class OPTICSPyrea(Clusterer):
         self.eps = eps
         self.xi = xi
         self.predecessor_correction = predecessor_correction
-        # self.memory = memory
+        # self.memory = memory  # TODO: This must be a new parameter since some version. Check.
         self.n_jobs = n_jobs
 
     def execute(self, data: list) -> list:
@@ -324,6 +335,7 @@ class Consensus(Fusion):
         Executes the consensus fusion algorithm on the provided clusterings,
         :attr:`views`.
         """
+        # Start consensus
         n_samp    = len(views[0])
         cl_cons   = np.zeros((n_samp,), dtype=int)
 
@@ -343,6 +355,7 @@ class Consensus(Fusion):
             if check == 0:
                 cl_cons[ids] = k
                 k = k + 1
+        # End consensus
 
         # Calculate binary matrix
         mat_bin   = np.zeros((n_samp, n_samp), dtype=int)
@@ -408,6 +421,7 @@ class View(object):
         self.data = np.asmatrix(data)
         self.clusterer = clusterer
         self.labels = None
+        self.precomputed = None
 
         # Numpy matrices can have max 2 dimensions, but can have 1 dimension.
         # If this needs to be checked revert to above below.
@@ -431,6 +445,7 @@ class Ward(Clusterer):
     """
     def __init__(self) -> None:
         super().__init__()
+        raise NotImplementedError("Deprecated.")
 
     def execute(self, data):
         """
@@ -445,6 +460,7 @@ class Complete(Clusterer):
     """
     def __init__(self) -> None:
         super().__init__()
+        raise NotImplementedError("Deprecated.")
 
     def execute(self, data):
         """
@@ -459,6 +475,7 @@ class Average(Clusterer):
     """
     def __init__(self) -> None:
         super().__init__()
+        raise NotImplementedError("Deprecated.")
 
     def execute(self, data):
         """
@@ -473,6 +490,7 @@ class Single(Clusterer):
     """
     def __init__(self) -> None:
         super().__init__()
+        raise NotImplementedError("Deprecated.")
 
     def execute(self, data):
         """
@@ -490,23 +508,17 @@ class Ensemble(object):
     :param fuser: The fusion algorithm to use.
     :param clusterers: The clustering algorithms to use on the fused matrix.
     """
-    def __init__(self, views: List[View], fuser: Fusion, clusterers: List[Clusterer]):
+    def __init__(self, views: List[View], fuser: Fusion):
 
         if isinstance(views, View):
             self.views = [views]
         elif isinstance(views, list):
             self.views = views
 
-        if isinstance(clusterers, Clusterer):
-            self.clusterers = [clusterers]
-        elif isinstance(clusterers, list):
-            self.clusterers = clusterers
-
         self.fuser = fuser
         self.labels = []
-        self.computed_views = []
 
-    def execute(self) -> View:
+    def execute(self):
         """
         Executes the ensemble, returning a :class:`View` object.
 
@@ -520,11 +532,4 @@ class Ensemble(object):
         # Fuse the clusterings to a single fused matrix
         fusion_matrix = self.fuser.execute(self.labels)
 
-        # Make new views with the fused matrix as data and the
-        # clutering algorithms that were passed.
-        for i in range(len(self.clusterers)):
-            self.computed_views.append(View(fusion_matrix, self.clusterers[i]))
-
-        # Return the new view(s). Multiple views are returned if
-        # multiple clusters were specified.
-        return self.computed_views
+        return fusion_matrix
