@@ -196,6 +196,10 @@ a genetic algorithm optimisation technique.
 A novel fusion technique, developed by one of the authors of this software
 package, named HCfused, will be included soon in a future update.
 
+# Miscellaneous
+
+Logo made by Adobe Express Logo Maker: <https://www.adobe.com/express/create/logo>
+
 # Citing
 
 If you find this package useful and wish to cite it, you can use the following:
