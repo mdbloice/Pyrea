@@ -43,7 +43,7 @@ d = [[1,2,3],
      [7,8,9]]
 
 # Create a clusterer
-c = pyrea.clusterer("agglomerative", n_clusters=2)
+c = pyrea.clusterer("hierarchical", n_clusters=2, method='ward')
 
 v = pyrea.view(d, c)
 ```
@@ -87,7 +87,7 @@ d2 = np.random.rand(1000,100)
 
 # Define the clustering algorithm(s) you want to use. In this case we used the same
 # algorithm for both views. By default n_clusters=2.
-c = pyrea.clusterer('agglomerative', n_clusters=2)
+c = pyrea.clusterer('hierarchical', n_clusters=2)
 
 # Create the views using the data and the same clusterer
 v1 = pyrea.view(d1, c)
@@ -122,8 +122,8 @@ import pyrea
 import numpy as np
 
 # Clusterers:
-hc1 = pyrea.clusterer('agglomerative', linkage='ward')
-hc2 = pyrea.clusterer('agglomerative', linkage='complete')
+hc1 = pyrea.clusterer('hierarchical', linkage='ward')
+hc2 = pyrea.clusterer('hierarchical', linkage='complete')
 
 # Fusion algorithm:
 f = pyrea.fuser('disagreement')
@@ -161,9 +161,9 @@ import pyrea
 import numpy as np
 
 # Clustering algorithms
-c1 = pyrea.clusterer('agglomerative', linkage='ward')
-c2 = pyrea.clusterer('agglomerative', linkage='complete')
-c3 = pyrea.clusterer('agglomerative', linkage='single')
+c1 = pyrea.clusterer('hierarchical', method='ward')
+c2 = pyrea.clusterer('hierarchical', method='complete')
+c3 = pyrea.clusterer('hierarchical', method='single')
 
 # Fusion algorithm
 f = pyrea.fuser('disagreement')
