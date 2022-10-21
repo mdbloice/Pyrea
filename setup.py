@@ -25,7 +25,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='pyrea',
-    version='1.0.5',
+    version='1.0.6',
     author='Marcus D. Bloice, Bastian Pfeifer',
     license='MIT',
     author_email='marcus.bloice@medunigraz.at',
@@ -42,7 +42,8 @@ setup(
     install_requires=[
         'pandas>0.20.0',
         'numpy>1.0.0',
-        'scikit-learn>1.1.0'
+        'scikit-learn>1.1.0',
+        'scipy>1.5.4'
     ],
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f]
 )

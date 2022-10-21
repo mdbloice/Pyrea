@@ -19,9 +19,11 @@ class that must be used if a developer wishes to create a custom fusion
 algorithm for use within Pyrea.
 """
 import numpy as np
+import scipy
 from sklearn.cluster import AgglomerativeClustering, SpectralClustering, DBSCAN, OPTICS
 from typing import List, Union, Any
 from scipy.cluster import hierarchy
+from scipy import spatial
 
 class Clusterer(object):
     """
@@ -42,21 +44,51 @@ class Clusterer(object):
         pass
 
 
-class HierarchicalClustering(Clusterer):
-    def __init__(self) -> None:
+class HierarchicalClusteringPyrea(Clusterer):
+    def __init__(self, precomputed,
+                       # linkage arguments:
+                       method='single',
+                       metric='euclidean',
+                       optimal_ordering=False,
+                       # pdist arguments:
+                       distance_metric = 'euclidean',
+                       out=None,
+                       # cut_tree arguments:
+                       n_clusters=None,
+                       height=None
+                       ) -> None:
         super().__init__()
+        self.n_clusters = n_clusters
+        self.metric = metric
+        self.method = method
+        self.optimal_ordering = optimal_ordering
+        self.distance_metric = distance_metric
+        self.precomputed = precomputed
+        self.out = out
+        self.height = height
 
-    def execute(self) -> list:
+    def execute(self, data) -> list:
         super().execute()
 
-        #X = scipy.spatial.distance.pdist(X, metric='euclidean', *, out=None, **kwargs)
-        #Dist = scipy.spatial.distance.pdist(X, metric='euclidean', *, out=None, **kwargs)
+        # TODO: Both pdist and linkage can take a distance metric.
+        # It must be possible for the user to provide both.
+        # Currently distance_metric is used for pdist although this then
+        # breaks compatibility with the SciPy docs. Fix.
+
+        if self.precomputed:
+            y = spatial.distance.squareform(data)
+            tree = hierarchy.linkage(y, method=self.method, metric=self.metric)
+        else:
+            y = spatial.distance.pdist(data, metric=self.distance_metric, out=self.out)
+            tree = hierarchy.linkage(y, method=self.method, metric=self.metric)
+
+        return hierarchy.cut_tree(tree, n_clusters=self.n_clusters, height=self.height)
 
 
 class AgglomerativeClusteringPyrea(Clusterer):
     def __init__(self, n_clusters=2,
                        linkage: str='ward',
-                       affinity='euclidean',
+                       affinity: str='euclidean',
                        memory: Union[None, Any]=None,
                        connectivity=None,
                        compute_full_tree='auto',
@@ -289,6 +321,7 @@ class Disagreement(Fusion):
             res = np.matrix(res)
             labels = labels + res
 
+        # return np.fill_diagonal(labels, 0)
         return labels
 
 
@@ -318,7 +351,7 @@ class Agreement(Fusion):
             res = np.matrix(res)
             labels = labels + res
 
-        return labels
+        return np.fill_diagonal(labels, 0)
 
 
 class Consensus(Fusion):

@@ -15,23 +15,26 @@ from cmath import exp
 from typing import List
 import numpy as np
 
-from .structure import AgglomerativeClusteringPyrea, Agreement, Clusterer, DBSCANPyrea, Disagreement, Ensemble, Fusion, OPTICSPyrea, SpectralClusteringPyrea, View, Consensus
+from .structure import Agreement, Clusterer, DBSCANPyrea, Disagreement
+from .structure import Ensemble, Fusion, HierarchicalClusteringPyrea
+from .structure import OPTICSPyrea, SpectralClusteringPyrea, View, Consensus
 
-CLUSTER_METHODS = ['spectral', 'agglomerative', 'dbscan', 'optics']
+CLUSTER_METHODS = ['spectral', 'hierarchical', 'dbscan', 'optics']
 FUSION_METHODS = ['agreement', 'consensus', 'disagreement']
+LINKAGES = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward']
 
 def clusterer(clusterer: str, precomputed: bool=False, **kwargs) -> Clusterer:
     """
     Creates a :class:`~pyrea.structure.Clusterer` object to be used when
     creating a :class:`~pyrea.structure.View` or
-    :class:`~pyrea.structure.Ensemble`. Can be one of: average, complete,
-    random, single, or ward.
+    :class:`~pyrea.structure.Ensemble`. Can be one of: :attr:`'spectral'`,
+    :attr:`'hierarchical'`, :attr:`'dbscan'`, or :attr:`'optics'`.
 
     .. code::
 
-        c = pyrea.clusterer('agglomerative', n_clusters=2)
+        c = pyrea.clusterer('hierarchical', n_clusters=2)
 
-    Then, :attr:`c` can be used when creating a view or executing an ensemble:
+    Then, :attr:`c` can be used when creating a view:
 
     .. code::
 
@@ -42,9 +45,45 @@ def clusterer(clusterer: str, precomputed: bool=False, **kwargs) -> Clusterer:
     .. seealso:: The :func:`~view` function.
     .. seealso:: The :func:`~execute_ensemble` function.
 
-    :param clusterer: The type of clusterer to use. Can be one of 'average',
-     'complete', 'random', 'single', or 'ward'.
-    :param n_clusters: The number of clusters to find. Default=2.
+    Each clustering algorithm has a different set of parameters, default values
+    are used throughout and can be overridden if required. For example,
+    hierarchical and spectral clustering allow you to specify the number of
+    clusters to find using :attr:`n_clusters`, while DBSCAN and OPTICS do not.
+
+    Also, hierarchical clustering allows for a :attr:`distance_metric` to be
+    set, which can be one of: :attr:`'braycurtis'`, :attr:`'canberra'`,
+    :attr:`'chebyshev'`, :attr:`'cityblock'`, :attr:`'correlation'`,
+    :attr:`'cosine'`, :attr:`'dice'`, :attr:`'euclidean'`, :attr:`'hamming'`,
+    :attr:`'jaccard'`, :attr:`'jensenshannon'`, :attr:`'kulczynski1'`,
+    :attr:`'mahalanobis'`, :attr:`'matching'`, :attr:`'minkowski'`,
+    :attr:`'rogerstanimoto'`, :attr:`'russellrao'`, :attr:`'seuclidean'`,
+    :attr:`'sokalmichener'`, :attr:`'sokalsneath'`, :attr:`'sqeuclidean'`, or
+    :attr:`'yule'`.
+
+    Likewise, adjusting the linkage method is possible using hierarchical
+    clustering algorithms, this can be one of: :attr:`'single'`,
+    :attr:`'complete'`, :attr:`'average'`, :attr:`'weighted'`,
+    :attr:`'centroid'`, :attr:`'median'`, or :attr:`'ward'`.
+
+    For complete documentation of each clustering algorithm's parameters see
+    the following:
+
+    * Spectral: :class:`~pyrea.structure.SpectralClusteringPyrea`
+    * Hierarchical: :class:`~pyrea.structure.HierarchicalClusteringPyrea`
+    * DBSCAN: :class:`~pyrea.structure.DBSCANPyrea`
+    * OPTICS: :class:`~pyrea.structure.OPTICSPyrea`
+
+    :param clusterer: The type of clusterer to use. Can be one of:
+     :attr:`'spectral'`, :attr:`'hierarchical'`, :attr:`'dbscan'`,
+     or :attr:`'optics'`.
+    :param precomputed: Whether the clusterer should assume the data is a
+     distance matrix.
+    :param \*\*kwargs: Keyword arguments to be passed to the clusterer.
+     See each clustering algorithm's documentation for full details: Spectral:
+     :class:`~pyrea.structure.SpectralClusteringPyrea`, Hierarchical:
+     :class:`~pyrea.structure.HierarchicalClusteringPyrea`, DBSCAN:
+     :class:`~pyrea.structure.DBSCANPyrea`, and OPTICS:
+     :class:`~pyrea.structure.OPTICSPyrea`.
     """
     if not isinstance(clusterer, str):
         raise TypeError("Parameter 'clusterer' must be of type string. Choices available are: %s."
@@ -60,11 +99,13 @@ def clusterer(clusterer: str, precomputed: bool=False, **kwargs) -> Clusterer:
 
         return SpectralClusteringPyrea(**kwargs)
 
-    elif clusterer == 'agglomerative':
-        if precomputed:
-            kwargs['affinity'] = 'precomputed'
+    elif clusterer == 'hierarchical':
 
-        return AgglomerativeClusteringPyrea(**kwargs)
+        if kwargs['method']:
+            if kwargs['method'] not in LINKAGES:
+                raise TypeError("Illegal method.")
+
+        return HierarchicalClusteringPyrea(precomputed=precomputed, **kwargs)
 
     elif clusterer == 'dbscan':
         if precomputed:
@@ -135,8 +176,8 @@ def execute_ensemble(views: List[View], fuser: Fusion) -> list:
 
         v = pyrea.execute_ensemble([view1, view2, view3], fusion, clusterer)
 
-    Returns a :class:`~pyrea.structure.View` object which can consequently be included in a
-    further ensemble.
+    Returns a :class:`~pyrea.structure.View` object which can consequently be
+    included in a further ensemble.
 
     .. seealso:: The :func:`~view` function.
     .. seealso:: The :func:`~clusterer` function.
@@ -158,9 +199,7 @@ def get_ensemble(views: List[View], fuser: Fusion, clusterers: List[Clusterer]) 
     return Ensemble(views, fuser, clusterers)
 
 def consensus(labels: list):
-    """
 
-    """
     if len(labels) <= 1:
         raise ValueError("You must provide a list of labellings of length >= 2.")
 
