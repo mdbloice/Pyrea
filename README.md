@@ -61,7 +61,7 @@ A fusion algorithm is therefore used to fuse the clusterings created from
 multiple views. Therefore, our next step is to create a *fuser* object:
 
 ```python
-f = pyrea.fuser('agreement')
+f = pyrea.fuser('disagreement')
 ```
 
 With you fusion algorithm `f`, you can execute an *ensemble*. The ensemble is
@@ -94,7 +94,7 @@ v1 = pyrea.view(d1, c)
 v2 = pyrea.view(d1, c)
 
 # Create a fusion object
-f = pyrea.fuser('agreement')
+f = pyrea.fuser('disagreement')
 
 # Execute an ensemble based on your views, fusion algorithm, and clusterer
 v_res = pyrea.execute_ensemble([v1, v2], f, c)
@@ -126,7 +126,7 @@ hc1 = pyrea.clusterer('agglomerative', linkage='ward')
 hc2 = pyrea.clusterer('agglomerative', linkage='complete')
 
 # Fusion algorithm:
-f = pyrea.fuser('agreement')
+f = pyrea.fuser('disagreement')
 
 # Create three random datasets
 d1 = np.random.rand(100,10)
@@ -166,7 +166,7 @@ c2 = pyrea.clusterer('agglomerative', linkage='complete')
 c3 = pyrea.clusterer('agglomerative', linkage='single')
 
 # Fusion algorithm
-f = pyrea.fuser('agreement')
+f = pyrea.fuser('disagreement')
 
 # Create the views with the random data directly:
 v1 = pyrea.view(np.random.rand(100,10), c1)
