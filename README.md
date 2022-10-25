@@ -104,7 +104,7 @@ v2 = pyrea.view(d2, c)
 f = pyrea.fuser('disagreement')
 
 # Execute an ensemble based on your views, fusion algorithm, and clusterer
-c1 = pyrea.clusterer("hierarchical", n_clusters=2, precomputed=True)
+c1 = pyrea.clusterer("hierarchical", n_clusters=2, method='ward', precomputed=True)
 v_res = pyrea.view(pyrea.execute_ensemble([v1, v2], f), c1)
 
 # The cluster solution can be obtained as follows
