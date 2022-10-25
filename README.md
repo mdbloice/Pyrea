@@ -58,7 +58,7 @@ To obtain the cluster solution the specified view can be executed
 v.execute()
 ```
 
-The clustering algorithm can be either 'spectral', 'agglomerative', 'dbscan', or 'optics'. See the documentation for a complete list of parameters that can be passed when creating a clusterer.
+The clustering algorithm can be either 'spectral', 'hierarchical', 'dbscan', or 'optics'. See the documentation for a complete list of parameters that can be passed when creating a clusterer.
 
 As this is a library for multi-view ensemble learning, you will normally have
 multiple views.
@@ -71,12 +71,12 @@ f = pyrea.fuser('disagreement')
 ```
 
 With you fusion algorithm `f`, you can execute an *ensemble*. The ensemble is created with a set of views and a fusion algorithm,
-and its returned object (distance or affinity matrix) can again be specified as view:
+and its returned object (distance or affinity matrix) can again be specified as a view:
 
 ```python
 # Create a new clusterer with precomputed=True
-c1 = pyrea.clusterer("hierarchical", n_clusters=2, method='ward', precomputed=True)
-v_res = pyrea.view(pyrea.execute_ensemble([v1, v2, v3], f), c1)
+c_pre = pyrea.clusterer("hierarchical", n_clusters=2, method='ward', precomputed=True)
+v_res = pyrea.view(pyrea.execute_ensemble([v1, v2, v3], f), c_pre)
 ```
 
 This newly created view, `v_res` can subsequently be fed into another ensemble,
@@ -167,7 +167,7 @@ v_ensemble_2 = pyrea.view(pyrea.execute_ensemble([v4, v5, v6], f), hc2_pre)
 # two previous ensemble methods:
 d_fuse  = pyrea.execute_ensemble([v_ensemble_1, v_ensemble_2], f)
 
-# The returned distance matrix used for the two clustering methods (hc1 and hc2)
+# The returned distance matrix is now used as an input for the two clustering methods (hc1 and hc2)
 v1_fuse = pyrea.view(d_fuse, hc1_pre)
 v2_fuse = pyrea.view(d_fuse, hc2_pre)
 
@@ -186,7 +186,7 @@ c1 = pyrea.clusterer('hierarchical', method='ward', n_clusters=2)
 c2 = pyrea.clusterer('hierarchical', method='complete', n_clusters=2)
 c3 = pyrea.clusterer('hierarchical', method='single', n_clusters=2)
 
-# Clustering algorithms (with precomputed distance matrix)
+# Clustering algorithms (so it works with a precomputed distance matrix)
 c1_pre = pyrea.clusterer('hierarchical', method='ward', n_clusters=2, precomputed=True)
 c2_pre = pyrea.clusterer('hierarchical', method='complete', n_clusters=2, precomputed=True)
 c3_pre = pyrea.clusterer('hierarchical', method='single', n_clusters=2, precomputed=True)
@@ -199,15 +199,15 @@ v1 = pyrea.view(np.random.rand(100,10), c1)
 v2 = pyrea.view(np.random.rand(100,10), c2)
 v3 = pyrea.view(np.random.rand(100,10), c3)
 
+# Create the ensemble and define new views based on the returned disagreement matrix v_res
 v_res  = pyrea.execute_ensemble([v1, v2, v3], f) 
 v1_res = pyrea.view(v_res, c1_pre)
 v2_res = pyrea.view(v_res, c2_pre)
 v3_res = pyrea.view(v_res, c3_pre)
 
+# Get the final cluster solution
 pyrea.consensus([v1_res.execute(), v2_res.execute(), v3_res.execute()])
 ```
-
-Notice how the ensemble is passed 3 clustering algorithms `[c1, c2, c3]`, and these are combined for a final clustering.
 
 ## Extensible
 
