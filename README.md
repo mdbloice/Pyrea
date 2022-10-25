@@ -48,15 +48,15 @@ c = pyrea.clusterer("hierarchical", n_clusters=2, method='ward')
 v = pyrea.view(d, c)
 ```
 
-To obtain the cluster solution the view can be executed
+You now have a view `v`, containing the data `d` using the clustering algorithm
+`c`. Note that many views can share the same clusterer, or each view may have a
+unique clusterer.
+
+To obtain the cluster solution the specified view can be executed
 
 ```python
 v.execute()
 ```
-
-You now have a view `v`, containing the data `d` using the clustering algorithm
-`c`. Note that many views can share the same clusterer, or each view may have a
-unique clusterer.
 
 The clustering algorithm can be either 'spectral', 'agglomerative', 'dbscan', or 'optics'. See the documentation for a complete list of parameters that can be passed when creating a clusterer.
 
@@ -106,6 +106,8 @@ f = pyrea.fuser('disagreement')
 # Execute an ensemble based on your views, fusion algorithm, and clusterer
 c1 = pyrea.clusterer("hierarchical", n_clusters=2, precomputed=True)
 v_res = pyrea.view(pyrea.execute_ensemble([v1, v2], f), c1)
+
+# The cluster solution can be obtained as follows
 v_res.execute()
 ```
 
@@ -117,7 +119,7 @@ For example, examine the two structures below:
 ![Ensemble Structures](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/parea.png)
 
 We will demonstrate how to create deep and flexible ensemble structures using
-the examples  a) and b) from the image above.
+the examples a) and b) from the image above.
 
 ### Example A
 This ensemble consists of two sets of three views, which are clustered, fused,
@@ -162,7 +164,7 @@ v_ensemble_2 = pyrea.view(pyrea.execute_ensemble([v4, v5, v6], f), hc2_pre)
 
 # Now we can execute a further ensemble, using the views generated from the
 # two previous ensemble methods:
-d_fuse  = pyrea.execute_ensemble([v_ensemble_1, v_ensemble_1], f)
+d_fuse  = pyrea.execute_ensemble([v_ensemble_1, v_ensemble_2], f)
 
 # The returned distance matrix used for the two clustering methods (hc1 and hc2)
 v1_fuse = pyrea.view(d_fuse, hc1_pre)
