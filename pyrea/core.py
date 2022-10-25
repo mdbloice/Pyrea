@@ -104,6 +104,11 @@ def clusterer(clusterer: str, precomputed: bool=False, **kwargs) -> Clusterer:
         if kwargs['method']:
             if kwargs['method'] not in LINKAGES:
                 raise TypeError("Illegal method.")
+        else:
+            kwargs['method'] = 'ward'
+
+        if not kwargs['n_clusters']:
+            raise TypeError("Error: n_clusters not set and is required for hierarchical clustering.")
 
         return HierarchicalClusteringPyrea(precomputed=precomputed, **kwargs)
 

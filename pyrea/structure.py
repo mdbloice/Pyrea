@@ -454,7 +454,6 @@ class View(object):
         self.data = np.asmatrix(data)
         self.clusterer = clusterer
         self.labels = None
-        self.precomputed = None
 
         # Numpy matrices can have max 2 dimensions, but can have 1 dimension.
         # If this needs to be checked revert to above below.
@@ -467,7 +466,7 @@ class View(object):
         initialisation.
         """
         # TODO: check the types here, do we expect a list of clusterers? Or one?
-        self.labels = self.clusterer.execute(self.data)
+        self.labels = self.clusterer.execute(self.data, precomputed=self.precomputed)
 
         return self.labels
 
