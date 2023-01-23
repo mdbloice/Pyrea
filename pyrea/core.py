@@ -14,6 +14,7 @@ from array import array
 from cmath import exp
 from typing import List
 import numpy as np
+from sklearn.metrics import silhouette_score
 
 from .structure import Agreement, Clusterer, DBSCANPyrea, Disagreement
 from .structure import Ensemble, Fusion, HierarchicalClusteringPyrea
@@ -21,7 +22,7 @@ from .structure import OPTICSPyrea, SpectralClusteringPyrea, View, Consensus
 
 CLUSTER_METHODS = ['spectral', 'hierarchical', 'dbscan', 'optics']
 FUSION_METHODS = ['agreement', 'consensus', 'disagreement']
-LINKAGES = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward']
+LINKAGES = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward', 'ward2']
 
 def clusterer(clusterer: str, precomputed: bool=False, **kwargs) -> Clusterer:
     """
@@ -245,3 +246,125 @@ def summary():
     print("\n")
 
     print(f" End Summary ".center(80, "*"))
+
+def silhouette(labels: list):
+
+    # Notes
+    # We need to have our final model as an object where
+    # you can pass data through it, in order to get predictions.
+    # So once a fit has been performed, we need to be able to
+    # get the labels.
+
+    return silhouette_score
+
+def parea_1(views: list = None, 
+                         c_1_type='hierarchical', c_1_method='ward', 
+                         c_2_type='hierarchical', c_2_method='complete',
+                         c_1_pre_type='hierarchical', c_1_pre_method='ward',
+                         c_2_pre_type='hierarchical', c_2_pre_method='complete',
+                         fusion_method='disagreement', k=2):
+    """
+    Implements the PAREA-1 algorithm.
+
+    The function accepts a list of parameters for the Parea 1 algorithm, 
+    which can optionally be optimised using a genetic algorithm.
+
+    The default values are those described in the package's paper and README 
+    documentation.
+    """
+
+    # Clusterers:
+    hc1 = clusterer(c_1_type, method=c_1_method, n_clusters=k)
+    hc2 = clusterer(c_2_type, method=c_2_method, n_clusters=k)
+
+    # Fusion algorithm:
+    f = fuser(fusion_method)
+
+    # Create three random datasets
+    d1 = np.random.rand(100,10)
+    d2 = np.random.rand(100,10)
+    d3 = np.random.rand(100,10)
+
+    # Views for ensemble 1
+    v1 = view(d1, hc1)
+    v2 = view(d2, hc1)
+    v3 = view(d3, hc1)
+
+    # Execute ensemble 1 and retrieve a new view, which is used later.
+    hc1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=k, precomputed=True)
+    v_ensemble_1 = view(execute_ensemble([v1, v2, v3], f), hc1_pre)
+
+    # Views for ensemble 2
+    v4 = view(d1, hc2)
+    v5 = view(d2, hc2)
+    v6 = view(d3, hc2)
+
+    # Execute our second ensemble, and retreive a new view:
+    hc2_pre = clusterer(c_2_pre_type, c_2_pre_method, n_clusters=k, precomputed=True)
+    v_ensemble_2 = view(execute_ensemble([v4, v5, v6], f), hc2_pre)
+
+    # Now we can execute a further ensemble, using the views generated from the
+    # two previous ensemble methods:
+    d_fuse  = execute_ensemble([v_ensemble_1, v_ensemble_2], f)
+
+    # The returned distance matrix is now used as an input for the two clustering methods (hc1 and hc2)
+    v1_fuse = view(d_fuse, hc1_pre)
+    v2_fuse = view(d_fuse, hc2_pre)
+
+    # and the cluster solutions are combined
+    c = consensus([v1_fuse.execute(), v2_fuse.execute()])
+
+    return c
+
+def parea_2(c_1_type='hierarchical', c_1_method='ward',
+            c_2_type='hierarchical', c_2_method='complete',
+            c_3_type='hierarchical', c_3_method='single',
+            c_1_pre_type='hierarchical', c_1_pre_method='ward',
+            c_2_pre_type='hierarchical', c_2_pre_method='complete',
+            c_3_pre_type='hierarchical', c_3_pre_method='single',
+            fusion_method='disagreement', k=2):
+
+    # Clustering algorithms
+    c1 = clusterer(c_1_type, method=c_1_method, n_clusters=k)
+    c2 = clusterer(c_2_type, method=c_2_method, n_clusters=k)
+    c3 = clusterer(c_3_type, method=c_3_method, n_clusters=k)
+
+    # Clustering algorithms (so it works with a precomputed distance matrix)
+    c1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=k)
+    c2_pre = clusterer(c_2_pre_type, method=c_2_pre_method, n_clusters=k)
+    c3_pre = clusterer(c_3_pre_type, method=c_3_pre_method, n_clusters=k)
+
+    # Fusion algorithm
+    f = fuser(fusion_method)
+
+    # Create the views with the random data directly:
+    v1 = view(np.random.rand(100,10), c1)
+    v2 = view(np.random.rand(100,10), c2)
+    v3 = view(np.random.rand(100,10), c3)
+
+    # Create the ensemble and define new views based on the returned disagreement matrix v_res
+    v_res  = execute_ensemble([v1, v2, v3], f) 
+    v1_res = view(v_res, c1_pre)
+    v2_res = view(v_res, c2_pre)
+    v3_res = view(v_res, c3_pre)
+
+    # Get the final cluster solution
+    c = consensus([v1_res.execute(), v2_res.execute(), v3_res.execute()])
+
+    return c
+
+def parea_1_genetic(views: list, k: int):
+    """
+    Genetic algorithm optimised implementation of Parea 1.
+    """
+    optimal_params= []
+
+    return optimal_params
+
+def parea_2_genetic(views: list, k: int):
+    """
+    Genetic algorithm optimised implementation of Parea 2.
+    """
+    optimal_params= []
+    
+    return optimal_params
