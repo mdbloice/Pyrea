@@ -19,7 +19,6 @@ class that must be used if a developer wishes to create a custom fusion
 algorithm for use within Pyrea.
 """
 import numpy as np
-import scipy
 from sklearn.cluster import AgglomerativeClustering, SpectralClustering, DBSCAN, OPTICS
 from typing import List, Union, Any
 from scipy.cluster import hierarchy
@@ -77,9 +76,17 @@ class HierarchicalClusteringPyrea(Clusterer):
 
         if self.precomputed:
             y = spatial.distance.squareform(data)
+
+            if self.method == 'ward2':
+                y = y**2
+
             tree = hierarchy.linkage(y, method=self.method, metric=self.metric)
         else:
             y = spatial.distance.pdist(data, metric=self.distance_metric, out=self.out)
+
+            if self.method == 'ward2':
+                y = y**2
+
             tree = hierarchy.linkage(y, method=self.method, metric=self.metric)
 
         return hierarchy.cut_tree(tree, n_clusters=self.n_clusters, height=self.height)
@@ -465,8 +472,8 @@ class View(object):
         Clusters the :attr:`data` using the :attr:`clusterer` specified at
         initialisation.
         """
-        # TODO: check the types here, do we expect a list of clusterers? Or one?
-        self.labels = self.clusterer.execute(self.data, precomputed=self.precomputed)
+        # TODO: If a list is passed, then we need to execute them all.
+        self.labels = self.clusterer.execute(self.data)
 
         return self.labels
 
