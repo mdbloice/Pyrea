@@ -10,11 +10,18 @@ functions within this module in order to create their ensemble structures.
 Developers, especially those who wish to extend Pyrea, may want to look at the
 classes and functions defined in the :py:mod:`pyrea.structure` module.
 """
+import random
 from array import array
 from cmath import exp
 from typing import List
 import numpy as np
 from sklearn.metrics import silhouette_score
+
+# Genetic algorithm imports
+from deap import base
+from deap import creator
+from deap import tools
+from deap import algorithms
 
 from .structure import Agreement, Clusterer, DBSCANPyrea, Disagreement
 from .structure import Ensemble, Fusion, HierarchicalClusteringPyrea
@@ -257,8 +264,8 @@ def silhouette(labels: list):
 
     return silhouette_score
 
-def parea_1(views: list = None, 
-                         c_1_type='hierarchical', c_1_method='ward', 
+def parea_1(views: list = None,
+                         c_1_type='hierarchical', c_1_method='ward',
                          c_2_type='hierarchical', c_2_method='complete',
                          c_1_pre_type='hierarchical', c_1_pre_method='ward',
                          c_2_pre_type='hierarchical', c_2_pre_method='complete',
@@ -266,10 +273,10 @@ def parea_1(views: list = None,
     """
     Implements the PAREA-1 algorithm.
 
-    The function accepts a list of parameters for the Parea 1 algorithm, 
+    The function accepts a list of parameters for the Parea 1 algorithm,
     which can optionally be optimised using a genetic algorithm.
 
-    The default values are those described in the package's paper and README 
+    The default values are those described in the package's paper and README
     documentation.
     """
 
@@ -316,6 +323,14 @@ def parea_1(views: list = None,
 
     return c
 
+def parea_1_genetic(views: list, max_k: int):
+    """
+    Genetic algorithm optimised implementation of Parea 1.
+    """
+    optimal_params= []
+
+    return optimal_params
+
 def parea_2(c_1_type='hierarchical', c_1_method='ward',
             c_2_type='hierarchical', c_2_method='complete',
             c_3_type='hierarchical', c_3_method='single',
@@ -323,6 +338,23 @@ def parea_2(c_1_type='hierarchical', c_1_method='ward',
             c_2_pre_type='hierarchical', c_2_pre_method='complete',
             c_3_pre_type='hierarchical', c_3_pre_method='single',
             fusion_method='disagreement', k=2):
+    """ Implements the PAREA-2 algorithm.
+
+    :param c_1_type: The type of clustering algorithm to use for the first clustering step.
+    :param c_1_method: The method of clustering algorithm to use for the first clustering step.
+    :param c_2_type: The type of clustering algorithm to use for the second clustering step.
+    :param c_2_method: The method of clustering algorithm to use for the second clustering step.
+    :param c_3_type: The type of clustering algorithm to use for the third clustering step.
+    :param c_3_method: The method of clustering algorithm to use for the third clustering step.
+    :param c_1_pre_type: The type of clustering algorithm to use for the first clustering step (precomputed).
+    :param c_1_pre_method: The method of clustering algorithm to use for the first clustering step (precomputed).
+    :param c_2_pre_type: The type of clustering algorithm to use for the second clustering step (precomputed).
+    :param c_2_pre_method: The method of clustering algorithm to use for the second clustering step (precomputed).
+    :param c_3_pre_type: The type of clustering algorithm to use for the third clustering step (precomputed).
+    :param c_3_pre_method: The method of clustering algorithm to use for the third clustering step (precomputed).
+    :param fusion_method: The method of fusion to use.
+    :param k: The number of clusters to use.
+    """
 
     # Clustering algorithms
     c1 = clusterer(c_1_type, method=c_1_method, n_clusters=k)
@@ -343,7 +375,7 @@ def parea_2(c_1_type='hierarchical', c_1_method='ward',
     v3 = view(np.random.rand(100,10), c3)
 
     # Create the ensemble and define new views based on the returned disagreement matrix v_res
-    v_res  = execute_ensemble([v1, v2, v3], f) 
+    v_res  = execute_ensemble([v1, v2, v3], f)
     v1_res = view(v_res, c1_pre)
     v2_res = view(v_res, c2_pre)
     v3_res = view(v_res, c3_pre)
@@ -353,18 +385,65 @@ def parea_2(c_1_type='hierarchical', c_1_method='ward',
 
     return c
 
-def parea_1_genetic(views: list, k: int):
-    """
-    Genetic algorithm optimised implementation of Parea 1.
-    """
-    optimal_params= []
-
-    return optimal_params
-
-def parea_2_genetic(views: list, k: int):
+def parea_2_genetic(views: list, max_k: int):
     """
     Genetic algorithm optimised implementation of Parea 2.
     """
-    optimal_params= []
-    
-    return optimal_params
+    # Create the toolbox
+    toolbox = base.Toolbox()
+
+    # Define possible parameters
+    cluster_methods = ['spectral', 'hierarchical', 'dbscan', 'optics']
+    fusion_methods = ['agreement', 'consensus', 'disagreement']
+    linkages = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward', 'ward2']
+    k_low, k_high = 2, max_k
+
+    # Set up our parameters for the genetic algorithm
+    toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
+    toolbox.register("c_1_method", random.choice, linkages)             # 1
+    toolbox.register("c_2_type", random.choice, cluster_methods)        # 2
+    toolbox.register("c_2_method", random.choice, linkages)             # 3
+    toolbox.register("c_3_type", random.choice, cluster_methods)        # 4
+    toolbox.register("c_3_method", random.choice, linkages)             # 5
+    toolbox.register("c_1_pre_type", random.choice, cluster_methods)    # 6
+    toolbox.register("c_1_pre_method", random.choice, linkages)         # 7
+    toolbox.register("c_2_pre_type", random.choice, cluster_methods)    # 8
+    toolbox.register("c_2_pre_method", random.choice, linkages)         # 9
+    toolbox.register("c_3_pre_type", random.choice, cluster_methods)    # 10
+    toolbox.register("c_3_pre_method", random.choice, linkages)         # 11
+    toolbox.register("fusion_method", random.choice, fusion_methods)    # 12
+    toolbox.register("k", random.randint, k_low, k_high)                # 13
+
+    # How the chromosomes are created
+    N_CYCLES = 1
+    toolbox.register("individual", tools.initCycle, creator.Individual,
+    (toolbox.c_1_type, toolbox.c_1_method, toolbox.c_2_type, toolbox.c_2_method,
+     toolbox.c_3_type, toolbox.c_3_method, toolbox.c_1_pre_type,
+     toolbox.c_1_pre_method, toolbox.c_2_pre_type, toolbox.c_2_pre_method,
+     toolbox.c_3_pre_type, toolbox.c_3_pre_method, toolbox.fusion_method,
+     toolbox.k), n=N_CYCLES)
+
+    # How the population is created
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    # Define how to mutate the chromosomes
+    def mutate(inidividual):
+        # Mutate one parameter randomly
+
+        gene = random.randint(0, 13)
+
+        if gene in [0, 2, 4, 6, 8, 10]:
+            inidividual[gene] = random.choice(cluster_methods)
+        elif gene in [1, 3, 5, 7, 9, 11]:
+            inidividual[gene] = random.choice(linkages)
+        elif gene == 12:
+            inidividual[gene] = random.choice(fusion_methods)
+        elif gene == 13:
+            inidividual[gene] = random.randint(k_low, k_high)
+
+        return inidividual
+
+    def evaluate(individual):
+        pass
+
+    return None
