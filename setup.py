@@ -43,7 +43,8 @@ setup(
         'pandas>0.20.0',
         'numpy>1.0.0',
         'scikit-learn>1.1.0',
-        'scipy>1.5.4'
+        'scipy>1.5.4',
+        'deap>1.3.0',
     ],
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f]
 )
