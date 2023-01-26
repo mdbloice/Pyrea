@@ -175,6 +175,10 @@ v2_fuse = pyrea.view(d_fuse, hc2_pre)
 pyrea.consensus([v1_fuse.execute(), v2_fuse.execute()])
 ```
 
+#### Helper Function
+See the `parea_2()` helper function for a pre-built version of structure above.
+
+### Example B
 As for structure b) in the image above, this can implemented as follows:
 
 ```python
@@ -208,6 +212,9 @@ v3_res = pyrea.view(v_res, c3_pre)
 # Get the final cluster solution
 pyrea.consensus([v1_res.execute(), v2_res.execute(), v3_res.execute()])
 ```
+
+#### Helper Function
+See the `parea_1()` helper function for a pre-built version of structure above.
 
 ## Genetic Algorithm
 The Parea 1 and Parea 2 structures can be optimised using a genetic algorithm in order to find the best combinations of clustering methods, fusion methods, and number of clusters.
