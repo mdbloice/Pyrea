@@ -200,7 +200,7 @@ v2 = pyrea.view(np.random.rand(100,10), c2)
 v3 = pyrea.view(np.random.rand(100,10), c3)
 
 # Create the ensemble and define new views based on the returned disagreement matrix v_res
-v_res  = pyrea.execute_ensemble([v1, v2, v3], f) 
+v_res  = pyrea.execute_ensemble([v1, v2, v3], f)
 v1_res = pyrea.view(v_res, c1_pre)
 v2_res = pyrea.view(v_res, c2_pre)
 v3_res = pyrea.view(v_res, c3_pre)
@@ -209,8 +209,26 @@ v3_res = pyrea.view(v_res, c3_pre)
 pyrea.consensus([v1_res.execute(), v2_res.execute(), v3_res.execute()])
 ```
 
-## Extensible
+## Genetic Algorithm
+The Parea 1 and Parea 2 structures can be optimised using a genetic algorithm in order to find the best combinations of clustering methods, fusion methods, and number of clusters.
 
+For example:
+
+```python
+import pyrea
+import numpy as np
+
+# Create your data
+d1 = np.random.rand(100,10)
+d2 = np.random.rand(100,10)
+d3 = np.random.rand(100,10)
+
+data = [d1, d2, d3]
+
+pyrea.parea_1_genetic(data)
+```
+
+## Extensible
 Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusion techniques with custom clustering algorithms that can be loaded in to Pyrea at run-time.
 
 By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.io/pyrea/extending.html#custom-clustering-algorithms) for details.
@@ -219,13 +237,12 @@ By providing a `View` with a `ClusterMethod` object, it makes providing custom c
 Several features are currently work in progress, future updates will include
 the features described in the sections below.
 
-## Genetic Algorithm
-Pyrea can select the best clustering algorithms and fusion algorithms based on
-a genetic algorithm optimisation technique.
-
 ## HCfused Clustering Algorithm
 A novel fusion technique, developed by one of the authors of this software
 package, named HCfused, will be included soon in a future update.
+
+## General Genetic Optimisation
+The package will be extended to allow for any custom Pyrea structures to be optimised using a genetic algorithm.
 
 # Miscellaneous
 
