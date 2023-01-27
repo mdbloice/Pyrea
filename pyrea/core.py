@@ -327,11 +327,11 @@ def parea_1_genetic(views: list, max_k: int):
     """
     Genetic algorithm optimised implementation of Parea 1.
     """
-    optimal_params= []
+    # TBC
 
-    return optimal_params
+    return None
 
-def parea_2(c_1_type='hierarchical', c_1_method='ward',
+def parea_2(data: list, c_1_type='hierarchical', c_1_method='ward',
             c_2_type='hierarchical', c_2_method='complete',
             c_3_type='hierarchical', c_3_method='single',
             c_1_pre_type='hierarchical', c_1_pre_method='ward',
@@ -340,6 +340,7 @@ def parea_2(c_1_type='hierarchical', c_1_method='ward',
             fusion_method='disagreement', k=2):
     """ Implements the PAREA-2 algorithm.
 
+    :param views: A list of views to be used in the ensemble.
     :param c_1_type: The type of clustering algorithm to use for the first clustering step.
     :param c_1_method: The method of clustering algorithm to use for the first clustering step.
     :param c_2_type: The type of clustering algorithm to use for the second clustering step.
@@ -356,10 +357,20 @@ def parea_2(c_1_type='hierarchical', c_1_method='ward',
     :param k: The number of clusters to use.
     """
 
+    if len(data) != 3:
+        raise ValueError("PAREA-2 requires exactly 3 data matrices.")
+
     # Clustering algorithms
     c1 = clusterer(c_1_type, method=c_1_method, n_clusters=k)
     c2 = clusterer(c_2_type, method=c_2_method, n_clusters=k)
     c3 = clusterer(c_3_type, method=c_3_method, n_clusters=k)
+
+    # Views
+    v1 = view(data[0], c1)
+    v2 = view(data[1], c2)
+    v3 = view(data[2], c3)
+
+    views = [v1, v2, v3]
 
     # Clustering algorithms (so it works with a precomputed distance matrix)
     c1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=k)
@@ -369,13 +380,8 @@ def parea_2(c_1_type='hierarchical', c_1_method='ward',
     # Fusion algorithm
     f = fuser(fusion_method)
 
-    # Create the views with the random data directly:
-    v1 = view(np.random.rand(100,10), c1)
-    v2 = view(np.random.rand(100,10), c2)
-    v3 = view(np.random.rand(100,10), c3)
-
     # Create the ensemble and define new views based on the returned disagreement matrix v_res
-    v_res  = execute_ensemble([v1, v2, v3], f)
+    v_res  = execute_ensemble(views, f)
     v1_res = view(v_res, c1_pre)
     v2_res = view(v_res, c2_pre)
     v3_res = view(v_res, c3_pre)
@@ -385,10 +391,20 @@ def parea_2(c_1_type='hierarchical', c_1_method='ward',
 
     return c
 
-def parea_2_genetic(views: list, max_k: int):
+def parea_2_genetic(data: list, max_k: int):
     """
     Genetic algorithm optimised implementation of Parea 2.
     """
+    # Create FitnesssMax and Individual classes/types.
+    # Maybe place this outside of this function as it will be called
+    # in the parea_1_genetic function also... and will be identical
+
+    if not hasattr(creator, "FitnessMax"):
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+
+    if not hasattr(creator, "Individual"):
+        creator.create("Individual", list, fitness=creator.FitnessMax)
+
     # Create the toolbox
     toolbox = base.Toolbox()
 
@@ -398,7 +414,12 @@ def parea_2_genetic(views: list, max_k: int):
     linkages = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward', 'ward2']
     k_low, k_high = 2, max_k
 
-    # Set up our parameters for the genetic algorithm
+    # For testing
+    cluster_methods = ['hierarchical']
+    fusion_methods = ['disagreement']
+    linkages = ['ward']
+
+    # Set up our parameters for the genetic algorithm                   # Index
     toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
     toolbox.register("c_1_method", random.choice, linkages)             # 1
     toolbox.register("c_2_type", random.choice, cluster_methods)        # 2
@@ -441,9 +462,36 @@ def parea_2_genetic(views: list, max_k: int):
         elif gene == 13:
             inidividual[gene] = random.randint(k_low, k_high)
 
-        return inidividual
+        print(inidividual)
+
+        return inidividual,
 
     def evaluate(individual):
-        pass
 
-    return None
+        labels = parea_2(data, individual[0], individual[1], individual[2], individual[3], individual[4], individual[5], individual[6], individual[7], individual[8], individual[9], individual[10], individual[11], individual[12], individual[13])
+
+        s1 = silhouette_score(data[0], labels)  # or view[0].data
+        s2 = silhouette_score(data[1], labels)  # or view[1].data
+        s3 = silhouette_score(data[2], labels)  # or view[2].data
+
+        # TODO: @Bastian we need to fix this evaluation metric
+        return s1 + s2 + s3 / 3,
+
+    # Register the functions
+    toolbox.register("mate", tools.cxOnePoint)
+    toolbox.register("mutate", mutate)
+    toolbox.register("select", tools.selTournament, tournsize=2)
+    toolbox.register("evaluate", evaluate)
+
+    population = toolbox.population(n=1000)
+    hall_of_fame = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+
+    stats.register("avg", np.mean)
+    stats.register("std", np.std)
+    stats.register("min", np.min)
+    stats.register("max", np.max)
+
+    x, y = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=100, stats=stats, halloffame=hall_of_fame, verbose=True)
+
+    return hall_of_fame[0]
