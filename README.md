@@ -232,8 +232,9 @@ d3 = np.random.rand(100,10)
 
 data = [d1, d2, d3]
 
-pyrea.parea_1_genetic(data)
+pyrea.parea_1_genetic(data, max_k=4)
 ```
+
 
 ## Extensible
 Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusion techniques with custom clustering algorithms that can be loaded in to Pyrea at run-time.
