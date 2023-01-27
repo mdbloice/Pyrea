@@ -145,7 +145,10 @@ class SpectralClusteringPyrea(Clusterer):
                        coef0=1,
                        kernel_params=None,
                        n_jobs=None,
-                       verbose=False) -> None:
+                       verbose=False,
+                       method=None) -> None:  # method is not used, but is here
+                                              # for compatibility with other
+                                              # clustering algorithms
         """
         Perform spectral clustering.
 
@@ -194,7 +197,12 @@ class DBSCANPyrea(Clusterer):
                        algorithm='auto',
                        leaf_size=30,
                        p=None,
-                       n_jobs=None) -> None:
+                       n_jobs=None,
+                       n_clusters=None,
+                       method=None, # n_clusters and method are not used,
+                                    # but are here for compatibility with other
+                                    # clustering algorithms
+                       ) -> None:
         super().__init__()
 
         self.eps = eps
@@ -231,7 +239,12 @@ class OPTICSPyrea(Clusterer):
                        algorithm='auto',
                        leaf_size=30,
                        # memory=None,
-                       n_jobs=None) -> None:
+                       n_jobs=None,
+                       n_clusters=None,
+                       method=None) -> None:  # n_clusters and method are not
+                                              # used, but are here for
+                                              # compatibility with other
+                                              # clustering algorithms
         super().__init__()
         self.max_eps = max_eps
         self.min_samples = min_samples
@@ -458,14 +471,12 @@ class View(object):
     """
     def __init__(self, data, clusterer: List[Clusterer]) -> None:
 
-        self.data = np.asmatrix(data)
+        self.data = np.asarray(data)
         self.clusterer = clusterer
         self.labels = None
 
-        # Numpy matrices can have max 2 dimensions, but can have 1 dimension.
-        # If this needs to be checked revert to above below.
-        #if data.ndim != 2:
-        #    raise Exception("Number of dimensions is not 2: you supplied a data structure with %s dimensions." % data.ndim)
+        if data.ndim != 2:
+            raise Exception("Number of dimensions is not 2: you supplied a data structure with %s dimensions." % data.ndim)
 
     def execute(self) -> list:
         """
