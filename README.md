@@ -289,8 +289,4 @@ The package will be extended to allow for any custom Pyrea structures to be opti
 
 Logo made by Adobe Express Logo Maker: <https://www.adobe.com/express/create/logo>
 
-# Citing
-
-If you find this package useful and wish to cite it, you can use the following:
-
 [^1]: Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2022). Parea: multi-view ensemble clustering for cancer subtype discovery. arXiv. <https://arxiv.org/abs/2209.15399>
