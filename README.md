@@ -23,6 +23,59 @@ This will install the latest version of Pyrea from PyPI.
 
 ## Usage
 
+The Pyrea software package is the accompanying software for this paper[^1].
+
+While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the papers cited above, namely Parea_1 and Parea_2.
+
+Both the structures, which are described in detail below as well as in the papers above, can be quickly generated and applied to your data using two helper functions:
+
+```python
+import pyrea
+import numpy as np
+
+
+# Create sample data:
+d1 = np.random.rand(100,10)
+d2 = np.random.rand(100,10)
+d3 = np.random.rand(100,10)
+
+labels = pyrea.parea_1([d1, d2, d3])
+```
+
+In this case we have created some fake data
+
+For Parea 2 we simply use the the `parea_2()` function.
+
+```python
+labels = pyrea.parea_2(data)
+```
+
+Default parameters are used which match those used in our experiments which haven been discussed paper[^1]. These default parameters can of course be overridden.
+
+### Genetic Algorithm
+
+The Parea 1 and Parea 2 structures can be optimised using a genetic algorithm in order to find the best combinations of clustering methods, fusion methods, and number of clusters.
+
+For example:
+
+```python
+import pyrea
+import numpy as np
+
+# Create your data
+d1 = np.random.rand(100,10)
+d2 = np.random.rand(100,10)
+d3 = np.random.rand(100,10)
+
+data = [d1, d2, d3]
+
+# For Parea 1:
+labels = pyrea.parea_1_genetic(data, max_k=4)
+
+# Or for Parea 2
+labels = pyrea.parea_2_genetic(data, max_k=4)
+```
+
 ### API
 
 **Please note that Pyrea is work in progress. The API may change from version
@@ -216,26 +269,6 @@ pyrea.consensus([v1_res.execute(), v2_res.execute(), v3_res.execute()])
 #### Helper Function
 See the `parea_2()` helper function for a pre-built version of structure above.
 
-## Genetic Algorithm
-The Parea 1 and Parea 2 structures can be optimised using a genetic algorithm in order to find the best combinations of clustering methods, fusion methods, and number of clusters.
-
-For example:
-
-```python
-import pyrea
-import numpy as np
-
-# Create your data
-d1 = np.random.rand(100,10)
-d2 = np.random.rand(100,10)
-d3 = np.random.rand(100,10)
-
-data = [d1, d2, d3]
-
-pyrea.parea_1_genetic(data, max_k=4)
-```
-
-
 ## Extensible
 Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusion techniques with custom clustering algorithms that can be loaded in to Pyrea at run-time.
 
@@ -260,4 +293,4 @@ Logo made by Adobe Express Logo Maker: <https://www.adobe.com/express/create/log
 
 If you find this package useful and wish to cite it, you can use the following:
 
-Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2022). Parea: multi-view ensemble clustering for cancer subtype discovery. arXiv. <https://arxiv.org/abs/2209.15399>
+[^1]: Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2022). Parea: multi-view ensemble clustering for cancer subtype discovery. arXiv. <https://arxiv.org/abs/2209.15399>
