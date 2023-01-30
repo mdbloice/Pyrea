@@ -22,10 +22,9 @@ pip install pyrea
 This will install the latest version of Pyrea from PyPI.
 
 ## Usage
+The Pyrea software package is the accompanying software for our paper: *Parea: multi-view ensemble clustering for cancer subtype discovery*[^1].
 
-The Pyrea software package is the accompanying software for our paper *Parea: multi-view ensemble clustering for cancer subtype discovery*[^1].
-
-While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the papers cited above, namely Parea 1 and Parea 2.
+While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the paper cited above, namely Parea 1 and Parea 2.
 
 Both the structures, which are described in detail below as well as in the paper mentioned above, can be quickly generated and applied to your data using two helper functions, `parea_1()` and `parea_2()`:
 
@@ -49,7 +48,7 @@ For Parea 2 we simply use the the `parea_2()` function.
 labels = pyrea.parea_2(data)
 ```
 
-Default parameters are used which match those used in our experiments which haven been discussed paper[^1]. These default parameters can of course be overridden.
+Default parameters are used which match those used in our experiments which haven been discussed paper[^1]. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
 
 ### Genetic Algorithm
 
