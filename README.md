@@ -285,9 +285,9 @@ package, named HCfused, will be included soon in a future update.
 The package will be extended to allow for any custom Pyrea structures to be optimised using a genetic algorithm.
 
 # Compilation of HC Fused C++ Code
-To use the HC Fused method you may need to compile the source code yourself if binaries are not available for your operating system. For Windows please consult <https://docs.python.org/3.5/library/ctypes.html#loading-shared-libraries>
+To use the HC Fused method you may need to compile the source code yourself if binaries are not available for your operating system.
 
-Pre-compiled binaries are available for Linux and have been tested using Linux only. The instructions below pertain to Linux only.
+Pre-compiled binaries are available for Linux and have been tested using Linux only. The instructions below pertain to Linux only. For Windows please consult <https://docs.python.org/3.5/library/ctypes.html#loading-shared-libraries>.
 
 To compile HC Fused first create a shared library (dynamic library) execute the following on the command line:
 
