@@ -79,8 +79,7 @@ where `max_k` refers to the maximum number of clusters to attempt.
 ### API
 
 **Please note that Pyrea is work in progress. The API may change from version
-to version in the coming weeks, which may introduce breaking changes to legacy
-code.**
+to version in the coming weeks, which could introduce breaking changes.**
 
 In Pyrea, your data are organised in to views. A view consists of the data in
 the form of a 2D matrix, and an associated clustering algorithm (a *clusterer*).
@@ -284,6 +283,25 @@ package, named HCfused, will be included soon in a future update.
 
 ## General Genetic Optimisation
 The package will be extended to allow for any custom Pyrea structures to be optimised using a genetic algorithm.
+
+# Compilation of HC Fused C++ Code
+To use the HC Fused method you may need to compile the source code yourself if binaries are not available for your operating system. For Windows please consult <https://docs.python.org/3.5/library/ctypes.html#loading-shared-libraries>
+
+Pre-compiled binaries are available for Linux and have been tested using Linux only. The instructions below pertain to Linux only.
+
+To compile HC Fused first create a shared library (dynamic library) execute the following on the command line:
+
+```bash
+$ gcc -c -fPIC HC_fused_cpp_opt6.cpp
+```
+
+and then create the `.so` file shared library file:
+
+```bash
+$ gcc HC_fused_cpp_opt6.cpp.o -shared -o libhcfused.so
+```
+
+and finally place the `libhcfused.so` file in the root directory of the package's installation directory.
 
 # Miscellaneous
 
