@@ -23,26 +23,25 @@ This will install the latest version of Pyrea from PyPI.
 
 ## Usage
 
-The Pyrea software package is the accompanying software for this paper[^1].
+The Pyrea software package is the accompanying software for our paper *Parea: multi-view ensemble clustering for cancer subtype discovery*[^1].
 
-While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the papers cited above, namely Parea_1 and Parea_2.
+While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the papers cited above, namely Parea 1 and Parea 2.
 
-Both the structures, which are described in detail below as well as in the papers above, can be quickly generated and applied to your data using two helper functions:
+Both the structures, which are described in detail below as well as in the paper mentioned above, can be quickly generated and applied to your data using two helper functions, `parea_1()` and `parea_2()`:
 
 ```python
 import pyrea
 import numpy as np
-
 
 # Create sample data:
 d1 = np.random.rand(100,10)
 d2 = np.random.rand(100,10)
 d3 = np.random.rand(100,10)
 
-labels = pyrea.parea_1([d1, d2, d3])
-```
+data = [d1,d2, d3]
 
-In this case we have created some fake data
+labels = pyrea.parea_1(data)
+```
 
 For Parea 2 we simply use the the `parea_2()` function.
 
