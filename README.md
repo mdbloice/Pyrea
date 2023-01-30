@@ -48,7 +48,7 @@ For Parea 2 we simply use the the `parea_2()` function.
 labels = pyrea.parea_2(data)
 ```
 
-Default parameters are used which match those used in our experiments which haven been discussed paper[^1]. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
+Default parameters are used which match those used in our experiments discussed in the paper above. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
 
 ### Genetic Algorithm
 
