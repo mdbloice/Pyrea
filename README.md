@@ -74,6 +74,8 @@ labels = pyrea.parea_1_genetic(data, max_k=4)
 labels = pyrea.parea_2_genetic(data, max_k=4)
 ```
 
+where `max_k` refers to the maximum number of clusters to attempt.
+
 ### API
 
 **Please note that Pyrea is work in progress. The API may change from version
