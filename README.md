@@ -287,18 +287,18 @@ The package will be extended to allow for any custom Pyrea structures to be opti
 # Compilation of HC Fused C++ Code
 To use the HC Fused method you may need to compile the source code yourself if binaries are not available for your operating system. HC Fused has been implemented in C++, see the `HC_fused_cpp_opt6.cpp` source file for more details.
 
-Pre-compiled binaries are available for Linux and have been tested using Linux only. The instructions below pertain to Linux only. For Windows please consult <https://docs.python.org/3.5/library/ctypes.html#loading-shared-libraries>.
+Pre-compiled binaries are available for Linux and have been tested using Linux only. The instructions below pertain to Linux only. For Windows please consult <https://docs.python.org/3.5/library/ctypes.html#loading-shared-libraries> and use a compiler such as MSVC or MinGW.
 
 To compile HC Fused (and then create a shared library/dynamic library) execute the following on the command line:
 
 ```bash
-$ gcc -c -fPIC HC_fused_cpp_opt6.cpp
+$ clang++ -c -fPIC HC_fused_cpp_opt6.cpp -o HC_fused_cpp_opt6.o
 ```
 
 and then create the `.so` file shared library file:
 
 ```bash
-$ gcc HC_fused_cpp_opt6.o -shared -o libhcfused.so
+$ clang++ HC_fused_cpp_opt6.o -shared -o libhcfused.so
 ```
 
 and finally place the `libhcfused.so` file in the root directory of the package's installation directory.
