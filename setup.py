@@ -1,5 +1,9 @@
 from setuptools import setup #, find_packages
 
+# For compiling external C++ code, see:
+# https://github.com/MLAlex1/DecisionTree_C_plus_plus_Python/blob/master/setup.py
+# and https://towardsdatascience.com/calling-c-code-from-python-with-ctypes-module-58404b9b3929
+
 CLASSIFIERS = """
 Development Status :: 1 - Planning
 Intended Audience :: Science/Research
