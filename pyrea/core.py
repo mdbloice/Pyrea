@@ -429,6 +429,15 @@ def parea_1_genetic(data: list, max_k: int):
 
     return hall_of_fame[0]
 
+def cluster_silhoutte_score(data: list, type: str, method: str, k: int, precomputed: bool=False):
+
+    # Cluster the data and get the labels
+    c = clusterer(type, precomputed=precomputed, method=method, n_clusters=k)
+    v = view(data, c)
+    v.execute()
+
+    return silhouette_score(data, v.labels, metric='precomputed' if precomputed else 'euclidean')
+
 def parea_2(data: list, c_1_type='hierarchical', c_1_method='ward',
             c_2_type='hierarchical', c_2_method='complete',
             c_3_type='hierarchical', c_3_method='single',
@@ -488,6 +497,25 @@ def parea_2(data: list, c_1_type='hierarchical', c_1_method='ward',
     c = consensus([v1_res.execute(), v2_res.execute(), v3_res.execute()])
 
     return c
+
+def parea_2_paper_genetic(data: list, max_k: int):
+    """
+    Parea 2 implementation as described in the paper.
+    """
+
+    pass
+
+    k_list = []
+    for d in data:
+        best_k = 0
+        best_s = 0
+        for k in range(2, max_k + 1):
+            for l in LINKAGES:
+                s = cluster_silhoutte_score(d, 'hierarchical', l, k)
+            if s > best_s:
+                best_k = k
+
+        k_list.append(best_k)
 
 def parea_2_genetic(data: list, max_k: int):
     """
