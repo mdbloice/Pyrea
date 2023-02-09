@@ -26,7 +26,7 @@ The Pyrea software package is the accompanying software for our paper: *Parea: m
 
 While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the paper cited above, namely Parea 1 and Parea 2.
 
-Both the structures, which are described in detail below as well as in the paper mentioned above, can be quickly generated and applied to your data using two helper functions, `parea_1()` and `parea_2()`:
+Both the structures, which are described in detail below as well as in the paper mentioned above, can be quickly generated and applied to your data using two helper functions, `parea_1()` and `parea_2()`, and can be quickly run as follows
 
 ```python
 import pyrea
@@ -39,14 +39,10 @@ d3 = np.random.rand(100,10)
 
 data = [d1,d2, d3]
 
-labels = pyrea.parea_1(data)
-```
-
-For Parea 2 we simply use the the `parea_2()` function.
-
-```python
 labels = pyrea.parea_2(data)
 ```
+
+which executes Parea 2.
 
 Default parameters are used which match those used in our experiments discussed in the paper above. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
 
@@ -54,27 +50,33 @@ Default parameters are used which match those used in our experiments discussed 
 
 The Parea 1 and Parea 2 structures can be optimised using a genetic algorithm in order to find the best combinations of clustering methods, fusion methods, and number of clusters.
 
-For example:
+For example, to find optimal parameters for Parea 2:
 
 ```python
-import pyrea
 import numpy as np
+import pyrea
+from sklearn import datasets
 
-# Create your data
-d1 = np.random.rand(100,10)
-d2 = np.random.rand(100,10)
-d3 = np.random.rand(100,10)
+d1 = datasets.load_iris().data
+d2 = datasets.load_iris().data
+d3 = datasets.load_iris().data
 
-data = [d1, d2, d3]
+data = [d1,d2,d3]
 
-# For Parea 1:
-labels = pyrea.parea_1_genetic(data, max_k=4)
-
-# Or for Parea 2
-labels = pyrea.parea_2_genetic(data, max_k=4)
+params = pyrea.parea_2_genetic(data, max_k=5)
 ```
 
-where `max_k` refers to the maximum number of clusters to attempt.
+where `max_k` refers to the maximum number of clusters to attempt for each layer.
+
+Note that `params` contains the optimal parameters found by the genetic algorithm. To get the labels, run `parea_2()` using these parameters and your data:
+
+```python
+pyrea.parea_2(data, *params)
+```
+
+which will return the cluster labels for your data.
+
+**Note**: Currently the genetic algorithm uses a population size of 100 and runs for 10 generations. This function will be updated to allow these to be customised.
 
 ### API
 
