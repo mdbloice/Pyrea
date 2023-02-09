@@ -1,9 +1,9 @@
 /**
- * @file HC_fused_cpp_opt6.cc
+ * @file HC_fused_cpp_opt6.cpp
  *
  * @brief Implements the HC Fusion algorithm
  *
- * @author X
+ * @author Andrei Voicu-Spineanu, Marcus D. Bloice, Bastian Pfeifer
  * Modified for Pyrea by: Marcus D. Bloice and Bastian Pfeifer
  * Contact: marcus.bloice@medunigraz.at
  *
@@ -146,9 +146,8 @@ void get_ij(int index,int obj_size, int *map_info_pair){
 
 // Function to call from Python
 int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, int n_iter)
-{ //END OF ARGUMENTS
-
-    // Convert the array to into vector
+{
+    // Convert the 2D array into a 2D vector
     vector<vector<int>> MAT(n_cluster_arrays, vector<int>(cluster_size));
 
     for(int i = 0; i < n_cluster_arrays; i++){
