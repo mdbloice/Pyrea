@@ -507,7 +507,7 @@ def parea_2_paper_genetic(data: list, max_k: int):
     Parea 2 implementation as described in the paper.
     """
 
-    pass
+    print("Deprecated. Use parea_2_genetic() instead.")
 
     k_list = []
     for d in data:
@@ -520,6 +520,8 @@ def parea_2_paper_genetic(data: list, max_k: int):
                 best_k = k
 
         k_list.append(best_k)
+
+    return None
 
 def parea_2_genetic(data: list, max_k: int):
     """
@@ -591,7 +593,7 @@ def parea_2_genetic(data: list, max_k: int):
     def mutate(inidividual):
         # Mutate one parameter randomly
 
-        gene = random.randint(0, 13)
+        gene = random.randint(0, 19)
 
         if gene in [0, 3, 6, 9, 12, 15]:
             inidividual[gene] = random.choice(cluster_methods)
@@ -608,7 +610,7 @@ def parea_2_genetic(data: list, max_k: int):
 
         sil = parea_2(data, individual[0], individual[1], individual[2], individual[3], individual[4], individual[5], individual[6], individual[7], individual[8], individual[9], individual[10], individual[11], individual[12], individual[13], individual[14], individual[15], individual[16], individual[17], individual[18], fitness=True)
 
-        print("Function parea_2 called returned with sillhouette score: %s" % sil)
+        print("Silhouette score: %s" % sil)
 
         return sil,
 
