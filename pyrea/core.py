@@ -264,11 +264,11 @@ def silhouette(labels: list):
 
     return silhouette_score
 
-def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward',
-            c_2_type='hierarchical', c_2_method='complete',
-            c_1_pre_type='hierarchical', c_1_pre_method='ward',
-            c_2_pre_type='hierarchical', c_2_pre_method='complete',
-            fusion_method='disagreement', k=2):
+def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
+            c_2_type='hierarchical', c_2_method='complete', c_2_k=2,
+            c_1_pre_type='hierarchical', c_1_pre_method='ward', c_1_pre_k=2,
+            c_2_pre_type='hierarchical', c_2_pre_method='complete', c_2_pre_k=2,
+            fusion_method='disagreement', fitness=False):
     """
     Implements the PAREA-1 algorithm.
 
@@ -290,48 +290,59 @@ def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward',
     :param c_2_pre_type: The clustering algorithm to use for the second pre-computed ensemble.
     :param c_2_pre_method: The clustering method to use for the second pre-computed ensemble.
     :param fusion_method: The fusion algorithm to use.
-    :param k: The number of clusters to compute.
     """
+
     if len(data) != 3:
         raise ValueError("PAREA-1 requires exactly 3 data matrices.")
 
-    # Clusterers:
-    hc1 = clusterer(c_1_type, method=c_1_method, n_clusters=k)
-    hc2 = clusterer(c_2_type, method=c_2_method, n_clusters=k)
+    # Clustering algorithms
+    c1 = clusterer(c_1_type, method=c_1_method, n_clusters=c_1_k)
+    c2 = clusterer(c_2_type, method=c_2_method, n_clusters=c_2_k)
+
+    # Clustering algorithms (so it works with a precomputed distance matrix)
+    c1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=c_1_pre_k, precomputed=True)
+    c2_pre = clusterer(c_2_pre_type, method=c_2_pre_method, n_clusters=c_2_pre_k, precomputed=True)
+
+
+    # Views for ensemble 1
+    v1 = view(data[0], c1)
+    v2 = view(data[1], c1)
+    v3 = view(data[2], c1)
+
+    views1 = [v1, v2, v3]
 
     # Fusion algorithm:
     f = fuser(fusion_method)
 
-    # Views for ensemble 1
-    v1 = view(data[0], hc1)
-    v2 = view(data[1], hc1)
-    v3 = view(data[2], hc1)
-
-    # Execute ensemble 1 and retrieve a new view, which is used later.
-    hc1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=k, precomputed=True)
-    v_ensemble_1 = view(execute_ensemble([v1, v2, v3], f), hc1_pre)
+    # Execute our first ensemble, and retreive a new view:
+    v_ensemble_1 = view(execute_ensemble(views1, f), c1_pre)
 
     # Views for ensemble 2
-    v4 = view(data[0], hc2)
-    v5 = view(data[1], hc2)
-    v6 = view(data[2], hc2)
+    v4 = view(data[0], c2)
+    v5 = view(data[1], c2)
+    v6 = view(data[2], c2)
+
+    views2 = [v4, v5, v6]
 
     # Execute our second ensemble, and retreive a new view:
-    hc2_pre = clusterer(c_2_pre_type, c_2_pre_method, n_clusters=k, precomputed=True)
-    v_ensemble_2 = view(execute_ensemble([v4, v5, v6], f), hc2_pre)
+    v_ensemble_2 = view(execute_ensemble(views2, f), c2_pre)
 
     # Now we can execute a further ensemble, using the views generated from the
     # two previous ensemble methods:
-    d_fuse  = execute_ensemble([v_ensemble_1, v_ensemble_2], f)
+    v_res  = execute_ensemble([v_ensemble_1, v_ensemble_2], f)
 
     # The returned distance matrix is now used as an input for the two clustering methods (hc1 and hc2)
-    v1_fuse = view(d_fuse, hc1_pre)
-    v2_fuse = view(d_fuse, hc2_pre)
+    v1_res = view(v_res, c1_pre)
+    v2_res = view(v_res, c2_pre)
 
     # and the cluster solutions are combined
-    c = consensus([v1_fuse.execute(), v2_fuse.execute()])
+    labels = consensus([v1_res.execute(), v2_res.execute()])
 
-    return c
+    if fitness:
+        return silhouette_score(v_res, labels, metric='precomputed')
+    else:
+        return labels
+
 
 def parea_1_genetic(data: list, max_k: int):
     """
@@ -346,30 +357,47 @@ def parea_1_genetic(data: list, max_k: int):
 
     toolbox = base.Toolbox()
 
+    # Cluster size range
+    k_low, k_high = 2, max_k
+
     # Define possible parameters
     # TODO: Replace these with the global variables
     cluster_methods = ['spectral', 'hierarchical', 'dbscan', 'optics']
     fusion_methods = ['agreement', 'consensus', 'disagreement']
     linkages = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward', 'ward2']
 
-    # Cluster size range
-    k_low, k_high = 2, max_k
+    # Overwrite the cluster and fusion methods temporarily
+    cluster_methods = ['hierarchical']
+    fusion_methods = ['disagreement']
 
     # Set up parameters for the genetic algorithm                       Index
     toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
     toolbox.register("c_1_method", random.choice, linkages)             # 1
-    toolbox.register("c_2_type", random.choice, cluster_methods)        # 2
-    toolbox.register("c_2_method", random.choice, linkages)             # 3
-    toolbox.register("c_1_pre_type", random.choice, cluster_methods)    # 4
-    toolbox.register("c_1_pre_method", random.choice, linkages)         # 5
-    toolbox.register("c_2_pre_type", random.choice, cluster_methods)    # 6
-    toolbox.register("c_2_pre_method", random.choice, linkages)         # 7
-    toolbox.register("fusion_method", random.choice, fusion_methods)    # 8
-    toolbox.register("k", random.randint, k_low, k_high)                # 9
+    toolbox.register("c_1_k", random.randint, k_low, k_high)            # 2
+    toolbox.register("c_2_type", random.choice, cluster_methods)        # 3
+    toolbox.register("c_2_method", random.choice, linkages)             # 4
+    toolbox.register("c_2_k", random.randint, k_low, k_high)            # 5
+    toolbox.register("c_1_pre_type", random.choice, cluster_methods)    # 6
+    toolbox.register("c_1_pre_method", random.choice, linkages)         # 7
+    toolbox.register("c_1_pre_k", random.randint, k_low, k_high)        # 8
+    toolbox.register("c_2_pre_type", random.choice, cluster_methods)    # 9
+    toolbox.register("c_2_pre_method", random.choice, linkages)         # 10
+    toolbox.register("c_2_pre_k", random.randint, k_low, k_high)        # 11
+    toolbox.register("fusion_method", random.choice, fusion_methods)    # 12
+
 
     # Chromosomes
+    # TODO: Add user parameter for N_CYCLES
     N_CYCLES = 1
-    toolbox.register("individual", tools.initCycle, creator.Individual, (toolbox.c_1_type, toolbox.c_1_method, toolbox.c_2_type, toolbox.c_2_method, toolbox.c_1_pre_type, toolbox.c_1_pre_method, toolbox.c_2_pre_type, toolbox.c_2_pre_method, toolbox.fusion_method, toolbox.k), n=N_CYCLES)
+    toolbox.register("individual", tools.initCycle, creator.Individual,
+                     (toolbox.c_1_type, toolbox.c_1_method, toolbox.c_1_k,
+                      toolbox.c_2_type, toolbox.c_2_method, toolbox.c_2_k,
+                      toolbox.c_1_pre_type, toolbox.c_1_pre_method, toolbox.c_1_pre_k,
+                      toolbox.c_2_pre_type, toolbox.c_2_pre_method, toolbox.c_2_pre_k,
+                      toolbox.fusion_method), n=N_CYCLES)
+
+    # How the population is created
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     def mutate(individual):
         """ Mutate an individual. """
@@ -380,32 +408,29 @@ def parea_1_genetic(data: list, max_k: int):
         gene = individual[index]
 
         # Mutate the parameter. Remember that:
-        # 0, 2, 4, 6, are cluster methods
-        # 1, 3, 5, 7, are linkages
-        # 8 is the fusion method
-        # 9 is the cluster size
+        # 0, 3, 6, 9, are cluster methods
+        # 1, 4, 7, 10, are linkages
+        # 2, 5, 8, 11, are cluster sizes
+        # 12 is the fusion method
 
-        if gene in [0, 2, 4, 6]:
+        if gene in [0, 3, 6, 9]:
             individual[gene] = random.choice(cluster_methods)
-        elif gene in [1, 3, 5, 7]:
+        elif gene in [1, 4, 7, 10]:
             individual[gene] = random.choice(linkages)
-        elif gene == 8:
-            individual[gene] = random.choice(fusion_methods)
-        elif gene == 9:
+        elif gene in [2, 5, 8, 11]:
             individual[gene] = random.randint(k_low, k_high)
+        elif gene == 12:
+            individual[gene] = random.choice(fusion_methods)
 
         return individual,
 
     def evaluate(individual):
         """ Evaluate an individual. """
-        labels = parea_1(data, individual[0], individual[1], individual[2], individual[3], individual[4], individual[5], individual[6], individual[7], individual[8], individual[9])
+        sil = parea_1(data, individual[0], individual[1], individual[2], individual[3], individual[4], individual[5], individual[6], individual[7], individual[8], individual[9], individual[10], individual[11], individual[12], fitness=True)
 
-        # Calculate the silhouette score
-        s1 = silhouette_score(data[0], labels)
-        s2 = silhouette_score(data[1], labels)
-        s3 = silhouette_score(data[2], labels)
+        print("Silhouette score: %s" % sil)
 
-        return (s1 + s2 + s3) / 3,
+        return sil,
 
     # Register the functions
     # TODO: Try other crossover methods and tournament sizes, etc.
@@ -415,7 +440,7 @@ def parea_1_genetic(data: list, max_k: int):
     toolbox.register("evaluate", evaluate)
 
     # Create the population
-    population = toolbox.population(n=1000)
+    population = toolbox.population(n=100)
     hall_of_fame = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
 
@@ -425,7 +450,7 @@ def parea_1_genetic(data: list, max_k: int):
     stats.register("max", np.max)
 
     # Run the genetic algorithm
-    x, y = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=100, stats=stats, halloffame=hall_of_fame, verbose=True)
+    x, y = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=10, stats=stats, halloffame=hall_of_fame, verbose=True)
 
     return hall_of_fame[0]
 
@@ -473,6 +498,11 @@ def parea_2(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
     c2 = clusterer(c_2_type, method=c_2_method, n_clusters=c_2_k)
     c3 = clusterer(c_3_type, method=c_3_method, n_clusters=c_3_k)
 
+    # Clustering algorithms (so it works with a precomputed distance matrix)
+    c1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=c_1_pre_k, precomputed=True)
+    c2_pre = clusterer(c_2_pre_type, method=c_2_pre_method, n_clusters=c_2_pre_k, precomputed=True)
+    c3_pre = clusterer(c_3_pre_type, method=c_3_pre_method, n_clusters=c_3_pre_k, precomputed=True)
+
     # Views
     v1 = view(data[0], c1)
     v2 = view(data[1], c2)
@@ -480,16 +510,12 @@ def parea_2(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
 
     views = [v1, v2, v3]
 
-    # Clustering algorithms (so it works with a precomputed distance matrix)
-    c1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=c_1_pre_k, precomputed=True)
-    c2_pre = clusterer(c_2_pre_type, method=c_2_pre_method, n_clusters=c_2_pre_k, precomputed=True)
-    c3_pre = clusterer(c_3_pre_type, method=c_3_pre_method, n_clusters=c_3_pre_k, precomputed=True)
-
     # Fusion algorithm
     f = fuser(fusion_method)
 
     # Create the ensemble and define new views based on the returned disagreement matrix v_res
     v_res  = execute_ensemble(views, f)
+
     v1_res = view(v_res, c1_pre)
     v2_res = view(v_res, c2_pre)
     v3_res = view(v_res, c3_pre)
@@ -502,26 +528,6 @@ def parea_2(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
     else:
         return labels
 
-def parea_2_paper_genetic(data: list, max_k: int):
-    """
-    Parea 2 implementation as described in the paper.
-    """
-
-    print("Deprecated. Use parea_2_genetic() instead.")
-
-    k_list = []
-    for d in data:
-        best_k = 0
-        best_s = 0
-        for k in range(2, max_k + 1):
-            for l in LINKAGES:
-                s = cluster_silhoutte_score(d, 'hierarchical', l, k)
-            if s > best_s:
-                best_k = k
-
-        k_list.append(best_k)
-
-    return None
 
 def parea_2_genetic(data: list, max_k: int):
     """
@@ -547,13 +553,11 @@ def parea_2_genetic(data: list, max_k: int):
     # TODO: Replace these with the global variables
     cluster_methods = ['spectral', 'hierarchical', 'dbscan', 'optics']
     fusion_methods = ['agreement', 'consensus', 'disagreement']
-    linkages = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward']
+    linkages = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward', 'ward2']
 
-    # For testing
-    # TODO: Remove this
+    # Overwrite the cluster and fusion methods temporarily
     cluster_methods = ['hierarchical']
     fusion_methods = ['disagreement']
-    # linkages = ['ward']
 
     # Set up our parameters for the genetic algorithm                   Index
     toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
@@ -578,6 +582,7 @@ def parea_2_genetic(data: list, max_k: int):
 
     # How the chromosomes are created
     N_CYCLES = 1
+    # TODO: Add user parameter for N_CYCLES
     toolbox.register("individual", tools.initCycle, creator.Individual,
     (toolbox.c_1_type, toolbox.c_1_method, toolbox.c_1_k, toolbox.c_2_type,
     toolbox.c_2_method, toolbox.c_2_k,

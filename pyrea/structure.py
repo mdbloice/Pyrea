@@ -80,14 +80,15 @@ class HierarchicalClusteringPyrea(Clusterer):
             if self.method == 'ward2':
                 y = y**2
 
-            tree = hierarchy.linkage(y, method=self.method, metric=self.metric)
+            tree = hierarchy.linkage(y, method='ward', metric=self.metric)
+
         else:
             y = spatial.distance.pdist(data, metric=self.distance_metric, out=self.out)
 
             if self.method == 'ward2':
                 y = y**2
 
-            tree = hierarchy.linkage(y, method=self.method, metric=self.metric)
+            tree = hierarchy.linkage(y, method='ward', metric=self.metric)
 
         return hierarchy.cut_tree(tree, n_clusters=self.n_clusters, height=self.height)
 
