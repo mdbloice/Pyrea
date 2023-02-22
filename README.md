@@ -63,10 +63,10 @@ d3 = datasets.load_iris().data
 
 data = [d1,d2,d3]
 
-params = pyrea.parea_2_genetic(data, max_k=5)
+params = pyrea.parea_2_genetic(data, k_min=2, k_max=5)
 ```
 
-where `max_k` refers to the maximum number of clusters to attempt for each layer.
+where `k_min` and `k_max` refer to the minimum and maximum number of clusters to attempt for each layer, respectively.
 
 Note that `params` contains the optimal parameters found by the genetic algorithm. To get the labels, run `parea_2()` using these parameters and your data:
 
@@ -76,7 +76,19 @@ pyrea.parea_2(data, *params)
 
 which will return the cluster labels for your data.
 
-**Note**: Currently the genetic algorithm uses a population size of 100 and runs for 10 generations. This function will be updated to allow these to be customised.
+Also, you may choose to define the **final** number of clusters returned by the algorithm (but allowing it to optimise intermediate numbers of clusters) by defining `k_final`, e.g:
+
+```python
+params = pyrea.parea_2_genetic(data, k_min=2, k_max=5, k_final=3)
+```
+
+and calling `pyrea_2()` as follows:
+
+```python
+pyrea.parea_2(data, params, k_final=3)
+```
+
+**Note**: Currently the genetic algorithm uses a population size of 100 and runs for 10 generations. This function will be updated to allow these parameters to be customised in the near future.
 
 ### API
 
