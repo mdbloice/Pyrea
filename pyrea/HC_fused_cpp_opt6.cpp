@@ -5,7 +5,6 @@
  *
  * @author Andrei Voicu-Spineanu, Marcus D. Bloice, Bastian Pfeifer
  * Modified for Pyrea by: Marcus D. Bloice and Bastian Pfeifer
- * Contact: marcus.bloice@medunigraz.at
  *
  */
 #include <iostream>

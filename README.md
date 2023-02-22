@@ -46,7 +46,7 @@ labels = pyrea.parea_2(data)
 
 which executes Parea 2.
 
-Default parameters are used which match those used in our experiments discussed in the paper[^1]. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
+Default parameters are used which match those used in our experiments discussed in the paper referenced above. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
 
 ### Genetic Algorithm
 
@@ -348,5 +348,3 @@ and finally place the `libhcfused.so` file in the root directory of the package'
 # Miscellaneous
 
 Logo made by Adobe Express Logo Maker: <https://www.adobe.com/express/create/logo>
-
-[^1]: Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2022). Parea: multi-view ensemble clustering for cancer subtype discovery. arXiv. <https://arxiv.org/abs/2209.15399>
