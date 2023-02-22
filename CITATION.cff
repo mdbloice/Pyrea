@@ -6,7 +6,7 @@ authors:
 - family-names: "Pfeifer"
   given-names: "Bastian"
 title: "Pyrea"
-version: 1.0.7
+version: 1.0.8
 date-released: 2022-09-29
 url: "https://github.com/mdbloice/Pyrea"
 preferred-citation:
