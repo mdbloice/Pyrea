@@ -29,7 +29,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='pyrea',
-    version='1.0.6',
+    version='1.0.7',
     author='Marcus D. Bloice, Bastian Pfeifer',
     license='MIT',
     author_email='marcus.bloice@medunigraz.at',
