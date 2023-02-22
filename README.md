@@ -345,6 +345,8 @@ $ clang++ HC_fused_cpp_opt6.o -shared -o libhcfused.so
 
 and finally place the `libhcfused.so` file in the root directory of the package's installation directory.
 
-# Miscellaneous
+# Tests
+Installation is tested on Python versions 3.8, 3.9, 3.10, and 3.11 on Ubuntu 20.04 LTS only. See the project's Actions for details. The package should also work using Python 3.6 and 3.7 and other operating systems, however.
 
+# Miscellaneous
 Logo made by Adobe Express Logo Maker: <https://www.adobe.com/express/create/logo>
