@@ -70,7 +70,33 @@ params = pyrea.parea_2_genetic(data, k_min=2, k_max=5)
 
 where `k_min` and `k_max` refer to the minimum and maximum number of clusters to attempt for each layer, respectively.
 
-Note that `params` contains the optimal parameters found by the genetic algorithm. To get the labels, run `parea_2()` using these parameters and your data:
+Note that `params` contains the optimal parameters found by the genetic algorithm:
+
+```python
+print(params)
+['hierarchical',
+ 'ward',
+ 2,
+ 'hierarchical',
+ 'ward2',
+ 4,
+ 'hierarchical',
+ 'single',
+ 3,
+ 'hierarchical',
+ 'ward',
+ 4,
+ 'hierarchical',
+ 'single',
+ 5,
+ 'hierarchical',
+ 'complete',
+ 3,
+ 'disagreement']
+```
+
+
+To get the labels, run `parea_2()` using these parameters and your data:
 
 ```python
 pyrea.parea_2(data, *params)
