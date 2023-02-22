@@ -74,6 +74,7 @@ Note that `params` contains the optimal parameters found by the genetic algorith
 
 ```python
 print(params)
+
 ['hierarchical',
  'ward',
  2,
@@ -94,7 +95,6 @@ print(params)
  3,
  'disagreement']
 ```
-
 
 To get the labels, run `parea_2()` using these parameters and your data:
 
