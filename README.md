@@ -22,11 +22,13 @@ pip install pyrea
 This will install the latest version of Pyrea from PyPI.
 
 ## Usage
-The Pyrea software package is the accompanying software for our paper: *Parea: multi-view ensemble clustering for cancer subtype discovery*[^1].
+The Pyrea software package is the accompanying software for our paper:
+
+Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2022). *Parea: multi-view ensemble clustering for cancer subtype discovery*. arXiv. <https://arxiv.org/abs/2209.15399>
 
 While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the paper cited above, namely Parea 1 and Parea 2.
 
-Both the structures, which are described in detail below as well as in the paper mentioned above, can be quickly generated and applied to your data using two helper functions, `parea_1()` and `parea_2()`, and can be quickly run as follows
+Both the structures, which are described in detail below as well as in the paper mentioned above, can be quickly generated and applied to your data using two helper functions, `parea_1()` and `parea_2()`, and can be quickly run as follows:
 
 ```python
 import pyrea
@@ -44,7 +46,7 @@ labels = pyrea.parea_2(data)
 
 which executes Parea 2.
 
-Default parameters are used which match those used in our experiments discussed in the paper above. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
+Default parameters are used which match those used in our experiments discussed in the paper[^1]. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
 
 ### Genetic Algorithm
 
@@ -93,7 +95,7 @@ pyrea.parea_2(data, params, k_final=3)
 ### API
 
 **Please note that Pyrea is work in progress. The API may change from version
-to version in the coming weeks, which could introduce breaking changes.**
+to version and introduce breaking changes.**
 
 In Pyrea, your data are organised in to views. A view consists of the data in
 the form of a 2D matrix, and an associated clustering algorithm (a *clusterer*).
