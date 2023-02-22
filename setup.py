@@ -5,7 +5,7 @@ from setuptools import setup #, find_packages
 # and https://towardsdatascience.com/calling-c-code-from-python-with-ctypes-module-58404b9b3929
 
 CLASSIFIERS = """
-Development Status :: 1 - Planning
+Development Status :: 4 - Beta
 Intended Audience :: Science/Research
 Intended Audience :: Developers
 License :: OSI Approved :: MIT License
