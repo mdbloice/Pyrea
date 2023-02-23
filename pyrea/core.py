@@ -254,16 +254,6 @@ def summary():
 
     print(f" End Summary ".center(80, "*"))
 
-def silhouette(labels: list):
-
-    # Notes
-    # We need to have our final model as an object where
-    # you can pass data through it, in order to get predictions.
-    # So once a fit has been performed, we need to be able to
-    # get the labels.
-
-    return silhouette_score
-
 def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
             c_2_type='hierarchical', c_2_method='complete', c_2_k=2,
             c_1_pre_type='hierarchical', c_1_pre_method='ward', c_1_pre_k=2,
