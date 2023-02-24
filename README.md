@@ -1,15 +1,21 @@
 # Pyrea
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/Pyrea-logos_transparent.png" width="400">
+     <img src="https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/Pyrea-logos_transparent.png" width="400">
+</p>
+<p align="center">
+     Multi-view clustering with flexible ensemble structures.
+</p>
+<p align="center">
+     <img src="https://img.shields.io/pypi/v/Pyrea">
+     <img src="https://img.shields.io/pypi/l/Pyrea">
+     <img src="https://img.shields.io/pypi/pyversions/Pyrea">
+</p>
+<p align="center">
+     <em>The name Pyrea is derived from the Greek word Parea, meaning a group of friends who gather to share experiences, values, and ideas.</em>
 </p>
 
-Multi-view clustering with flexible ensemble structures.
-
-*The name Pyrea is derived from the Greek word Parea, meaning a group of
-friends who gather to share experiences, values, and ideas.*
-
-![PyPI](https://img.shields.io/pypi/v/Pyrea) ![PyPI - License](https://img.shields.io/pypi/l/Pyrea) ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Pyrea)
+---
 
 ## Installation
 
