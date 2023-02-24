@@ -55,7 +55,6 @@ The Parea 1 and Parea 2 structures can be optimised using a genetic algorithm in
 For example, to find optimal parameters for Parea 2:
 
 ```python
-import numpy as np
 import pyrea
 from sklearn import datasets
 
