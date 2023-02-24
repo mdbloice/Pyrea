@@ -7,9 +7,9 @@
      Multi-view clustering with flexible ensemble structures.
 </p>
 <p align="center">
-     <img src="https://img.shields.io/pypi/v/Pyrea">
-     <img src="https://img.shields.io/pypi/l/Pyrea">
-     <img src="https://img.shields.io/pypi/pyversions/Pyrea">
+     <a href="https://pypi.org/project/pyrea/"><img src="https://img.shields.io/pypi/v/Pyrea"></a>
+     <a href="https://github.com/mdbloice/Pyrea/blob/master/LICENSE"><img src="https://img.shields.io/pypi/l/Pyrea"></a>
+     <a href="https://github.com/mdbloice/Pyrea/actions/workflows/main.yml"><img src="https://img.shields.io/pypi/pyversions/Pyrea"></a>
 </p>
 <p align="center">
      <em>The name Pyrea is derived from the Greek word Parea, meaning a group of friends who gather to share experiences, values, and ideas.</em>
