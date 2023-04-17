@@ -14,7 +14,7 @@
 #include "HC_fused_cpp_opt6.hpp"
 using namespace std;
 
-//Function which calculates the mean value from a matrix
+// Function which calculates the mean value from a matrix
 double getmean(int i,int j, int *mat, int elem, int *obj_mat, int *obj_sizes, int n_patients){
     double accum = 0;
 
@@ -28,7 +28,7 @@ double getmean(int i,int j, int *mat, int elem, int *obj_mat, int *obj_sizes, in
     return accum;
 }
 
-//Function that calculates the similarity matrix - distances
+// Function that calculates the similarity matrix - distances
 void HC_fused_calc_distances_cpp(int *obj, int *MAT, int *matAND, int *obj_sizes, double *DISTANCES, double *mat_distances,int n_elems,int n_patients, int n_clusters, int col_nr){
     //reset mat_distances
     for(int i=0;i<col_nr;i++){
@@ -48,7 +48,7 @@ void HC_fused_calc_distances_cpp(int *obj, int *MAT, int *matAND, int *obj_sizes
         for(int j=0;j<col_nr;j++){
             DISTANCES[elem*(col_nr)+j] = mat_distances[j];
         }
-        dist_index = 0; //reset the dist_index for the next Matrix
+        dist_index = 0; // Reset the dist_index for the next matrix
     };
 
     dist_index = 0;
@@ -67,7 +67,7 @@ void HC_fused_calc_distances_cpp(int *obj, int *MAT, int *matAND, int *obj_sizes
 // Function that returns indices values of elements equal to the max of distances
 void which_vec_mat(double *distances, int *res_vec, int *res_mat, int &ids_valid_size, int n_clusters,int n_elems,int col_nr){
 
-    //calculate distances valid size:
+    // Calculate distances valid size:
     int distances_valid_size = n_clusters*(n_clusters-1)/2; // Based on combinations of n taken by 2
     double max_el = distances[0];
     int res_counter=0;
@@ -96,7 +96,7 @@ void which_vec_mat(double *distances, int *res_vec, int *res_mat, int &ids_valid
     ids_valid_size = res_counter;
 }
 
-//Function that returns the line number of elements from ids2 which are equal to the no. of rows from distances
+// Function that returns the line number of elements from ids2 which are equal to the no. of rows from distances
 void which_is3(int *ids2,int ids_valid_size,int dist_size, int *is3_res, int &is3_valid_size){
     int is3_counter = 0;
     for(int i=0;i<2*ids_valid_size;i=i+2){
@@ -108,7 +108,7 @@ void which_is3(int *ids2,int ids_valid_size,int dist_size, int *is3_res, int &is
     is3_valid_size = is3_counter;
 }
 
-//Function used to get a single number out of a vector
+// Function used to get a single number out of a vector
 int get_sample(int *vec,bool randomize, int vec_valid_size){ //also add valid vector size as argument
     if(randomize == false){
         return vec[0];
@@ -117,7 +117,7 @@ int get_sample(int *vec,bool randomize, int vec_valid_size){ //also add valid ve
     }
 }
 
-//Function that updates map_info_pair, indicating which patients clusters will merge
+// Function that updates map_info_pair, indicating which patients clusters will merge
 void get_ij(int index,int obj_size, int *map_info_pair){
     int col_elems = obj_size-1;
     int nr_elems = obj_size-1;
@@ -155,8 +155,8 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
         }
     }
 
-    //memory allocations
-    //HC_fused function
+    // Memory allocations
+    // HC_fused function
     int n_patients = sqrt(MAT[0].size());
     int *obj = (int*)malloc(sizeof(int)*n_patients*n_patients);
     int *obj_sizes_initial = (int*)malloc(sizeof(int)*n_patients);
@@ -171,7 +171,7 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
     int n_pat_sqr = MAT[0].size();
     int n_elems = MAT.size();
 
-    //input argument pointer
+    // Input argument pointer
     int *MAT_p = (int*)malloc(sizeof(int)*n_elems*n_pat_sqr);
     int index = 0;
     for(int i=0;i<n_elems;i++){
@@ -211,7 +211,7 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
     map_info_pair[1]=0;
     int id_min=0;
 
-    //Calc_distances function allocations
+    // Calc_distances function allocations
     int col_nr = n_patients*(n_patients-1)/2;
     double *distances = (double*)malloc(sizeof(double)*(n_elems+1)*col_nr);
     for(int i=0;i<(n_elems+1)*col_nr;i++){
@@ -223,7 +223,7 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
         mat_distances[i]=0;
     }
 
-    //which_vec_mat function allocations
+    // which_vec_mat function allocations
     int distances_total_size = (n_elems+1)*col_nr;
     int *res_vec = (int*)malloc(sizeof(int)*distances_total_size);
     for(int i=0;i<distances_total_size;i++){
@@ -236,7 +236,7 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
 
     int ids_valid_size = 0;
 
-    //which_is3 function allocations
+    // which_is3 function allocations
     int *is3 = (int*)malloc(sizeof(int)*distances_total_size);
     for(int i=0;i<distances_total_size;i++){
         is3[i]=0;
@@ -246,13 +246,13 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
 
     for(int xx=0;xx<n_iter;xx++){
 
-        //Reinitialize obj_dyn
+        // Reinitialize obj_dyn
         for(int i=0;i<n_patients*n_patients;i++){
             obj_dyn[i]=obj[i];
         }
-        //Reinitialize n_clusters
+        // Reinitialize n_clusters
         int n_clusters = n_patients;
-        //Reinitialize obj_sizes
+        // Reinitialize obj_sizes
         for(int i=0;i<n_patients;i++){
             obj_sizes[i]=obj_sizes_initial[i];
         }
@@ -261,21 +261,21 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
 
             HC_fused_calc_distances_cpp(obj_dyn, MAT_p, matAND, obj_sizes,distances, mat_distances,n_elems,n_patients, n_clusters, col_nr);
 
-            which_vec_mat(distances,res_vec, res_mat, ids_valid_size, n_clusters, n_elems, col_nr); //updates res_vec and res_mat
+            which_vec_mat(distances,res_vec, res_mat, ids_valid_size, n_clusters, n_elems, col_nr); // Updates res_vec and res_mat
 
-            which_is3(res_mat, ids_valid_size, n_elems+1, is3, is3_valid_size); //updates is3
+            which_is3(res_mat, ids_valid_size, n_elems+1, is3, is3_valid_size); // Updates is3
 
 
             if(is3_valid_size!=0){
                 if(is3_valid_size>1){
-                    id_min = res_vec[get_sample(is3,true,is3_valid_size)]; //true for random number, false for the first number from the vector
-                }else{ // only one element in is3
+                    id_min = res_vec[get_sample(is3,true,is3_valid_size)]; // True for random number, false for the first number from the vector
+                }else{ // Only one element in is3
                     id_min = res_vec[is3[0]];
                 }
             }else{ // is3 is empty
                 if(ids_valid_size>1){
-                    id_min = get_sample(res_vec,true, ids_valid_size); //true for random number, false for the first number from the vector
-                }else{ // only one element in ids
+                    id_min = get_sample(res_vec,true, ids_valid_size); // True for random number, false for the first number from the vector
+                }else{ // Only one element in ids
                     id_min = res_vec[0];
                 }
             }
@@ -283,28 +283,28 @@ int* HC_fused_cpp_opt6(int* MAT_array, int n_cluster_arrays, int cluster_size, i
 
             get_ij(id_min/(n_elems+1), n_clusters , map_info_pair);//updates map_info_pair
 
-            //Insert and adjust the size of obj_sizes
-            for(int i=0;i<obj_sizes[map_info_pair[1]];i++){ //based on the number of elements in the soon-to-be erased vector
+            // Insert and adjust the size of obj_sizes
+            for(int i=0;i<obj_sizes[map_info_pair[1]];i++){ // Based on the number of elements in the soon-to-be erased vector
                 obj_dyn[map_info_pair[0]*n_patients + obj_sizes[map_info_pair[0]] +i] = obj_dyn[map_info_pair[1]*n_patients + i];
             }
             obj_sizes[map_info_pair[0]] += obj_sizes[map_info_pair[1]];
 
             for(int elem=map_info_pair[1];elem<n_clusters-1;elem++){
                 for(int i=0;i<n_patients;i++){
-                    obj_dyn[elem*n_patients + i] = obj_dyn[(elem+1)*n_patients + i]; // translate the patients starting from map_info_pair[1]
+                    obj_dyn[elem*n_patients + i] = obj_dyn[(elem+1)*n_patients + i]; // Translate the patients starting from map_info_pair[1]
                 }
             }
-            //Last vector from obj_dyn:
+            // Last vector from obj_dyn:
             for(int i=0;i<n_patients;i++){
                 obj_dyn[(n_clusters-1)*n_patients + i] = 0;
             }
 
 
-            //obj_sizes
+            // obj_sizes
             for(int elem=map_info_pair[1];elem<n_clusters-1;elem++){
                 obj_sizes[elem] = obj_sizes[elem+1];
             }
-            //Last element from obj_sizes:
+            // Last element from obj_sizes:
             obj_sizes[n_clusters-1] = 0;
 
             n_clusters--; // Added to take into account the decreasing size of obj_dyn
