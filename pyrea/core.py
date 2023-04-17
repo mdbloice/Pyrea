@@ -341,10 +341,109 @@ def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
     else:
         return labels
 
-def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None):
+def parea_1_spectral(data: list,
+            c_1_type='spectral', c_1_n_neighbors=10, c_1_k=2,
+            c_2_type='spectral', c_2_n_neighbors=10, c_2_k=2,
+            c_1_pre_type='spectral', c_1_pre_n_neighbors=10, c_1_pre_k=2,
+            c_2_pre_type='spectral', c_2_pre_n_neighbors=10, c_2_pre_k=2,
+            fusion_method='disagreement', fitness=False, k_final=None):
+
+    # NOTE: All code below here is identical to parea_1, except for the
+    # clusterer. Therefore, it would make sense to refactor this code to
+    # remove the duplication.
+    c1 = clusterer(c_1_type, n_neighbors=c_1_n_neighbors, n_clusters=c_1_k)
+    c2 = clusterer(c_2_type, n_neighbors=c_2_n_neighbors, n_clusters=c_2_k)
+
+    c1_pre = clusterer(c_1_pre_type, n_neighbors=c_1_pre_n_neighbors, n_clusters=c_1_pre_k, precomputed=True)
+    c2_pre = clusterer(c_2_pre_type, n_neighbors=c_2_pre_n_neighbors, n_clusters=c_2_pre_k, precomputed=True)
+
+    # Views for ensemble 1
+    v1 = view(data[0], c1)
+    v2 = view(data[1], c1)
+    v3 = view(data[2], c1)
+
+    views1 = [v1, v2, v3]
+
+    # Fusion algorithm:
+    f = fuser(fusion_method)
+
+    # Execute our first ensemble, and retreive a new view:
+    v_ensemble_1 = view(execute_ensemble(views1, f), c1_pre)
+
+    # Views for ensemble 2
+    v4 = view(data[0], c2)
+    v5 = view(data[1], c2)
+    v6 = view(data[2], c2)
+
+    views2 = [v4, v5, v6]
+
+    # Execute our second ensemble, and retreive a new view:
+    v_ensemble_2 = view(execute_ensemble(views2, f), c2_pre)
+
+    # Now we can execute a further ensemble, using the views generated from the
+    # two previous ensemble methods:
+    v_res  = execute_ensemble([v_ensemble_1, v_ensemble_2], f)
+
+    if k_final:
+        c_final = clusterer(c_1_pre_type, n_neighbors=c_1_pre_n_neighbors, n_clusters=k_final, precomputed=True)
+        v_res_final = view(v_res, c_final)
+        labels = v_res_final.execute()
+
+        # Labels are returned differently in spectral clustering, so we need to
+        # change how these are returned (compared to hierarchical clustering)
+        # TODO: Check why this is the case!
+        # labels = labels[:,0]
+    else:
+        # The returned distance matrix is now used as an input for the two clustering methods (hc1 and hc2)
+        v1_res = view(v_res, c1_pre)
+        v2_res = view(v_res, c2_pre)
+
+        # and the cluster solutions are combined
+        labels = consensus([v1_res.execute(), v2_res.execute()])
+
+    if fitness:
+        return silhouette_score(v_res, labels, metric='precomputed')
+    else:
+        return labels
+
+def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None):
+    """
+    Genetic algorithm optimised implementation of Parea 1 with spectral clustering.
+    """
+
+    toolbox = base.Toolbox()
+
+    cluster_methods = ['spectral']
+
+    # Set up parameters for the genetic algorithm                       Index
+    toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
+    toolbox.register("c_1_method", random.choice, linkages)             # 1
+    toolbox.register("c_1_k", random.randint, k_min, k_max)             # 2
+    toolbox.register("c_2_type", random.choice, cluster_methods)        # 3
+    toolbox.register("c_2_method", random.choice, linkages)             # 4
+    toolbox.register("c_2_k", random.randint, k_min, k_max)             # 5
+    toolbox.register("c_1_pre_type", random.choice, cluster_methods)    # 6
+    toolbox.register("c_1_pre_method", random.choice, linkages)         # 7
+    toolbox.register("c_1_pre_k", random.randint, k_min, k_max)         # 8
+    toolbox.register("c_2_pre_type", random.choice, cluster_methods)    # 9
+    toolbox.register("c_2_pre_method", random.choice, linkages)         # 10
+    toolbox.register("c_2_pre_k", random.randint, k_min, k_max)         # 11
+    toolbox.register("fusion_method", random.choice, fusion_methods)    # 12
+
+
+def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, family: str = 'hierarchical'):
     """
     Genetic algorithm optimised implementation of Parea 1.
+
+    Use family='spectral' for spectral clustering.
     """
+
+    # Check if specified family is valid
+    if family not in ['hierarchical', 'spectral']:
+        raise ValueError("Invalid family specified. Must be 'hierarchical' or 'spectral'.")
+    elif family == 'spectral':
+        raise NotImplementedError("Spectral clustering not yet implemented.")
+
     # Check if creator has been initialised
     if not hasattr(creator, "FitnessMax"):
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -637,11 +736,11 @@ def parea_2_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
             warnings.simplefilter("ignore")
 
             sil = parea_2(data,
-                          individual[0],
-                          individual[1],
-                          individual[2],
-                          individual[3],
-                          individual[4],
+                            individual[0],
+                            individual[1],
+                            individual[2],
+                            individual[3],
+                            individual[4],
                           individual[5],
                           individual[6],
                           individual[7],
