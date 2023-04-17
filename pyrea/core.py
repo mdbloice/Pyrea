@@ -411,24 +411,26 @@ def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, k_final: Union[
     Genetic algorithm optimised implementation of Parea 1 with spectral clustering.
     """
 
-    toolbox = base.Toolbox()
+    pass
 
-    cluster_methods = ['spectral']
+    #toolbox = base.Toolbox()
+
+    #cluster_methods = ['spectral']
 
     # Set up parameters for the genetic algorithm                       Index
-    toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
-    toolbox.register("c_1_method", random.choice, linkages)             # 1
-    toolbox.register("c_1_k", random.randint, k_min, k_max)             # 2
-    toolbox.register("c_2_type", random.choice, cluster_methods)        # 3
-    toolbox.register("c_2_method", random.choice, linkages)             # 4
-    toolbox.register("c_2_k", random.randint, k_min, k_max)             # 5
-    toolbox.register("c_1_pre_type", random.choice, cluster_methods)    # 6
-    toolbox.register("c_1_pre_method", random.choice, linkages)         # 7
-    toolbox.register("c_1_pre_k", random.randint, k_min, k_max)         # 8
-    toolbox.register("c_2_pre_type", random.choice, cluster_methods)    # 9
-    toolbox.register("c_2_pre_method", random.choice, linkages)         # 10
-    toolbox.register("c_2_pre_k", random.randint, k_min, k_max)         # 11
-    toolbox.register("fusion_method", random.choice, fusion_methods)    # 12
+    #toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
+    #toolbox.register("c_1_method", random.choice, linkages)             # 1
+    #toolbox.register("c_1_k", random.randint, k_min, k_max)             # 2
+    #toolbox.register("c_2_type", random.choice, cluster_methods)        # 3
+    #toolbox.register("c_2_method", random.choice, linkages)             # 4
+    #toolbox.register("c_2_k", random.randint, k_min, k_max)             # 5
+    #toolbox.register("c_1_pre_type", random.choice, cluster_methods)    # 6
+    #toolbox.register("c_1_pre_method", random.choice, linkages)         # 7
+    #toolbox.register("c_1_pre_k", random.randint, k_min, k_max)         # 8
+    #toolbox.register("c_2_pre_type", random.choice, cluster_methods)    # 9
+    #toolbox.register("c_2_pre_method", random.choice, linkages)         # 10
+    #toolbox.register("c_2_pre_k", random.randint, k_min, k_max)         # 11
+    #toolbox.register("fusion_method", random.choice, fusion_methods)    # 12
 
 
 def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, family: str = 'hierarchical'):
