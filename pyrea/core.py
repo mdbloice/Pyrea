@@ -340,7 +340,7 @@ def parea_1_spectral(data: list,
             c_2_pre_type='spectral', c_2_pre_n_neighbors=10, c_2_pre_k=2,
             fusion_method='disagreement', fitness=False, k_final=None):
 
-    # NOTE: All code below here is identical to parea_1, except for the
+    # NOTE: All code below here is almost identical to parea_1, except for the
     # clusterer. Therefore, it would make sense to refactor this code to
     # remove the duplication.
     c1 = clusterer(c_1_type, n_neighbors=c_1_n_neighbors, n_clusters=c_1_k)
@@ -394,47 +394,128 @@ def parea_1_spectral(data: list,
     else:
         return labels
 
-def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None):
+def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, n_neighbors_min: int, n_neighbors_max: int, k_final: Union[int, None] = None, n_population=100, n_generations=10):
     """
     Genetic algorithm optimised implementation of Parea 1 with spectral clustering.
     """
 
-    pass
+    # Check if creator has been initialised
+    # TODO: Check if this is required.
+    if not hasattr(creator, "FitnessMax"):
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 
-    #toolbox = base.Toolbox()
+    if not hasattr(creator, "Individual"):
+        creator.create("Individual", list, fitness=creator.FitnessMax)
 
-    #cluster_methods = ['spectral']
+    toolbox = base.Toolbox()
 
-    # Set up parameters for the genetic algorithm                       Index
-    #toolbox.register("c_1_type", random.choice, cluster_methods)        # 0
-    #toolbox.register("c_1_method", random.choice, linkages)             # 1
-    #toolbox.register("c_1_k", random.randint, k_min, k_max)             # 2
-    #toolbox.register("c_2_type", random.choice, cluster_methods)        # 3
-    #toolbox.register("c_2_method", random.choice, linkages)             # 4
-    #toolbox.register("c_2_k", random.randint, k_min, k_max)             # 5
-    #toolbox.register("c_1_pre_type", random.choice, cluster_methods)    # 6
-    #toolbox.register("c_1_pre_method", random.choice, linkages)         # 7
-    #toolbox.register("c_1_pre_k", random.randint, k_min, k_max)         # 8
-    #toolbox.register("c_2_pre_type", random.choice, cluster_methods)    # 9
-    #toolbox.register("c_2_pre_method", random.choice, linkages)         # 10
-    #toolbox.register("c_2_pre_k", random.randint, k_min, k_max)         # 11
-    #toolbox.register("fusion_method", random.choice, fusion_methods)    # 12
+    # TODO: Check that we can use more fusion methods with Spectral
+    cluster_methods = ['spectral']
+    fusion_methods = ['disagreement']
 
+    # Set up parameters for the genetic algorithm                                               Index
+    toolbox.register("c_1_type", random.choice, cluster_methods)                                # 0
+    toolbox.register("c_1_n_neighbors", random.randint, n_neighbors_min, n_neighbors_max)       # 1
+    toolbox.register("c_1_k", random.randint, k_min, k_max)                                     # 2
+    toolbox.register("c_2_type", random.choice, cluster_methods)                                # 3
+    toolbox.register("c_2_n_neighbors", random.randint, n_neighbors_min, n_neighbors_max)       # 4
+    toolbox.register("c_2_k", random.randint, k_min, k_max)                                     # 5
+    toolbox.register("c_1_pre_type", random.choice, cluster_methods)                            # 6
+    toolbox.register("c_1_pre_n_neighbors", random.randint, n_neighbors_min, n_neighbors_max)   # 7
+    toolbox.register("c_1_pre_k", random.randint, k_min, k_max)                                 # 8
+    toolbox.register("c_2_pre_type", random.choice, cluster_methods)                            # 9
+    toolbox.register("c_2_pre_n_neighbors", random.randint, n_neighbors_min, n_neighbors_max)   # 10
+    toolbox.register("c_2_pre_k", random.randint, k_min, k_max)                                 # 11
+    toolbox.register("fusion_method", random.choice, fusion_methods)                            # 12
 
-def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, family: str = 'hierarchical', n_population=100, n_generations=10):
+    # TODO: Let user define this
+    N_CYCLES = 1
+    toolbox.register("individual", tools.initCycle, creator.Individual, 
+        (toolbox.c_1_type, toolbox.c_1_n_neighbors, toolbox.c_1_k,
+        toolbox.c_2_type, toolbox.c_2_n_neighbors, toolbox.c_2_k,
+        toolbox.c_1_pre_type, toolbox.c_1_pre_n_neighbors, toolbox.c_1_pre_k,
+        toolbox.c_2_pre_type, toolbox.c_2_pre_n_neighbors, toolbox.c_2_pre_k,
+        toolbox.fusion_method), n=N_CYCLES)
+    
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    def mutate(individual):
+        index = random.randint(0, len(individual) - 1)
+        gene = individual[index]
+
+        # Refer to indices above using toolbox.register
+        if gene in [0, 3, 6, 9]:
+            individual[gene] = random.choice(cluster_methods)
+        elif gene in [1, 4, 7, 10]:
+            individual[gene] = random.randint(n_neighbors_min, n_neighbors_max)
+        elif gene in [2, 5, 8, 11]:
+            individual[gene] = random.randint(k_min, k_max)
+        elif gene == 12:
+            individual[gene] = random.choice(fusion_methods)
+
+        return individual,
+
+    def evaluate(individual):
+        """ Evaluate an individual. """
+
+        # sklearn uses np.matrix which throws a warning as it is deprecated
+        # Use this to silence the warning
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            sil = parea_1(data,
+                          individual[0],
+                          individual[1],
+                          individual[2],
+                          individual[3],
+                          individual[4],
+                          individual[5],
+                          individual[6],
+                          individual[7],
+                          individual[8],
+                          individual[9],
+                          individual[10],
+                          individual[11],
+                          individual[12],
+                          fitness=True, k_final=k_final)
+
+        print("Silhouette score: %s" % sil)
+
+        return sil,
+
+    # Register the functions
+    # TODO: Try other crossover methods and tournament sizes, etc.
+    toolbox.register("mate", tools.cxOnePoint)
+    toolbox.register("mutate", mutate)
+    toolbox.register("select", tools.selTournament, tournsize=2)
+    toolbox.register("evaluate", evaluate)
+
+    # Create the population
+    population = toolbox.population(n=n_population)
+    hall_of_fame = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+
+    stats.register("avg", np.mean)
+    stats.register("std", np.std)
+    stats.register("min", np.min)
+    stats.register("max", np.max)
+
+    # Run the genetic algorithm
+    pop, log = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=n_generations, stats=stats, halloffame=hall_of_fame, verbose=True)
+
+    print(f"\nSummary:\n{log}")
+
+    return hall_of_fame[0]
+
+def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, n_population=100, n_generations=10):
     """
     Genetic algorithm optimised implementation of Parea 1.
 
-    Use family='spectral' for spectral clustering.
+    Use family='spectral' for spectral clustering. Not yet implemented.
     """
 
-    # Check if specified family is valid
-    if family not in ['hierarchical', 'spectral']:
-        raise ValueError("Invalid family specified. Must be 'hierarchical' or 'spectral'.")
-    elif family == 'spectral':
-        raise NotImplementedError("Spectral clustering not yet implemented.")
-
     # Check if creator has been initialised
+    # TODO: Check if this is required.
     if not hasattr(creator, "FitnessMax"):
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 
