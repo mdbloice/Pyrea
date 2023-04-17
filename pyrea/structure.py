@@ -172,22 +172,24 @@ class SpectralClusteringPyrea(Clusterer):
         self.n_jobs = n_jobs
         self.verbose = verbose
 
-        def execute(self, data: list) -> list:
-            return SpectralClustering(n_clusters=self.n_clusters,
-                                      eigen_solver=self.eigen_solver,
-                                      n_components=self.n_components,
-                                      random_state=self.random_state,
-                                      n_init=self.n_init,
-                                      gamma=self.gamma,
-                                      affinity=self.affinity,
-                                      n_neighbors=self.n_neighbors,
-                                      eigen_tol=self.eigen_tol,
-                                      assign_labels=self.assign_labels,
-                                      degree=self.degree,
-                                      coef0=self.coef0,
-                                      kernel_params=self.kernel_params,
-                                      n_jobs=self.n_jobs,
-                                      verbose=self.verbose).fit().labels_
+    def execute(self, data: list) -> list:
+        super().execute()
+
+        return SpectralClustering(n_clusters=self.n_clusters,
+                                    eigen_solver=self.eigen_solver,
+                                    n_components=self.n_components,
+                                    random_state=self.random_state,
+                                    n_init=self.n_init,
+                                    gamma=self.gamma,
+                                    affinity=self.affinity,
+                                    n_neighbors=self.n_neighbors,
+                                    eigen_tol=self.eigen_tol,
+                                    assign_labels=self.assign_labels,
+                                    degree=self.degree,
+                                    coef0=self.coef0,
+                                    kernel_params=self.kernel_params,
+                                    n_jobs=self.n_jobs,
+                                    verbose=self.verbose).fit(data).labels_
 
 
 class DBSCANPyrea(Clusterer):
