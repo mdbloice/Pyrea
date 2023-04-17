@@ -421,7 +421,7 @@ def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, k_final: Union[
     #toolbox.register("fusion_method", random.choice, fusion_methods)    # 12
 
 
-def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, family: str = 'hierarchical'):
+def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, family: str = 'hierarchical', n_population=100, n_generations=10):
     """
     Genetic algorithm optimised implementation of Parea 1.
 
@@ -540,7 +540,7 @@ def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
     toolbox.register("evaluate", evaluate)
 
     # Create the population
-    population = toolbox.population(n=100)
+    population = toolbox.population(n=n_population)
     hall_of_fame = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
 
@@ -550,7 +550,7 @@ def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
     stats.register("max", np.max)
 
     # Run the genetic algorithm
-    pop, log = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=10, stats=stats, halloffame=hall_of_fame, verbose=True)
+    pop, log = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=n_generations, stats=stats, halloffame=hall_of_fame, verbose=True)
 
     print(f"\nSummary:\n{log}")
 
