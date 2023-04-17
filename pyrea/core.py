@@ -270,7 +270,7 @@ def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
     .. seealso:: The :func:`~parea_2_genetic` function for a genetic algorithm
      optimised implementation of PAREA-2.
 
-    :param data: A list of 3 NumPy matrices or 2D arrays.
+    :param data: A list of Numpy matrices or 2D arrays.
     :param c_1_type: The clustering algorithm to use for the first ensemble.
     :param c_1_method: The clustering method to use for the first ensemble.
     :param c_2_type: The clustering algorithm to use for the second ensemble.
@@ -282,9 +282,6 @@ def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
     :param fusion_method: The fusion algorithm to use.
     """
 
-    if len(data) != 3:
-        raise ValueError("PAREA-1 requires exactly 3 data matrices.")
-
     # Clustering algorithms
     c1 = clusterer(c_1_type, method=c_1_method, n_clusters=c_1_k)
     c2 = clusterer(c_2_type, method=c_2_method, n_clusters=c_2_k)
@@ -293,13 +290,10 @@ def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
     c1_pre = clusterer(c_1_pre_type, method=c_1_pre_method, n_clusters=c_1_pre_k, precomputed=True)
     c2_pre = clusterer(c_2_pre_type, method=c_2_pre_method, n_clusters=c_2_pre_k, precomputed=True)
 
-
     # Views for ensemble 1
-    v1 = view(data[0], c1)
-    v2 = view(data[1], c1)
-    v3 = view(data[2], c1)
-
-    views1 = [v1, v2, v3]
+    views1 = []
+    for v in data:
+        views1.append(view(v, c1))
 
     # Fusion algorithm:
     f = fuser(fusion_method)
@@ -308,11 +302,9 @@ def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
     v_ensemble_1 = view(execute_ensemble(views1, f), c1_pre)
 
     # Views for ensemble 2
-    v4 = view(data[0], c2)
-    v5 = view(data[1], c2)
-    v6 = view(data[2], c2)
-
-    views2 = [v4, v5, v6]
+    views2 = []
+    for v in data:
+        views2.append(view(v, c2))
 
     # Execute our second ensemble, and retreive a new view:
     v_ensemble_2 = view(execute_ensemble(views2, f), c2_pre)
@@ -358,11 +350,9 @@ def parea_1_spectral(data: list,
     c2_pre = clusterer(c_2_pre_type, n_neighbors=c_2_pre_n_neighbors, n_clusters=c_2_pre_k, precomputed=True)
 
     # Views for ensemble 1
-    v1 = view(data[0], c1)
-    v2 = view(data[1], c1)
-    v3 = view(data[2], c1)
-
-    views1 = [v1, v2, v3]
+    views1 = []
+    for v in data:
+        views1.append(view(v, c1))
 
     # Fusion algorithm:
     f = fuser(fusion_method)
@@ -371,11 +361,9 @@ def parea_1_spectral(data: list,
     v_ensemble_1 = view(execute_ensemble(views1, f), c1_pre)
 
     # Views for ensemble 2
-    v4 = view(data[0], c2)
-    v5 = view(data[1], c2)
-    v6 = view(data[2], c2)
-
-    views2 = [v4, v5, v6]
+    views2 = []
+    for v in data:
+        views2.append(view(v, c2))
 
     # Execute our second ensemble, and retreive a new view:
     v_ensemble_2 = view(execute_ensemble(views2, f), c2_pre)
