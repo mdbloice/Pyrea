@@ -105,7 +105,6 @@ def clusterer(clusterer: str, precomputed: bool=False, **kwargs) -> Clusterer:
     if clusterer == 'spectral':
         if precomputed:
             kwargs['affinity'] = 'precomputed'
-
         return SpectralClusteringPyrea(**kwargs)
 
     elif clusterer == 'hierarchical':
@@ -338,7 +337,7 @@ def parea_1_spectral(data: list,
             c_2_type='spectral', c_2_n_neighbors=10, c_2_k=2,
             c_1_pre_type='spectral', c_1_pre_n_neighbors=10, c_1_pre_k=2,
             c_2_pre_type='spectral', c_2_pre_n_neighbors=10, c_2_pre_k=2,
-            fusion_method='disagreement', fitness=False, k_final=None):
+            fusion_method='agreement', fitness=False, k_final=None):
 
     # NOTE: All code below here is almost identical to parea_1, except for the
     # clusterer. Therefore, it would make sense to refactor this code to
@@ -375,12 +374,10 @@ def parea_1_spectral(data: list,
     if k_final:
         c_final = clusterer(c_1_pre_type, n_neighbors=c_1_pre_n_neighbors, n_clusters=k_final, precomputed=True)
         v_res_final = view(v_res, c_final)
-        labels = v_res_final.execute()
-
         # Labels are returned differently in spectral clustering, so we need to
         # change how these are returned (compared to hierarchical clustering)
-        # TODO: Check why this is the case!
-        # labels = labels[:,0]
+        labels = v_res_final.execute()
+
     else:
         # The returned distance matrix is now used as an input for the two clustering methods (hc1 and hc2)
         v1_res = view(v_res, c1_pre)
@@ -390,7 +387,9 @@ def parea_1_spectral(data: list,
         labels = consensus([v1_res.execute(), v2_res.execute()])
 
     if fitness:
-        return silhouette_score(v_res, labels, metric='precomputed')
+        v_res_disagreement = 1 - (v_res/v_res.max())
+        np.fill_diagonal(v_res_disagreement, 0)  # DONE IN PLACE!
+        return silhouette_score(v_res_disagreement, labels, metric='precomputed')
     else:
         return labels
 
@@ -411,7 +410,7 @@ def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, n_neighbors_min
 
     # TODO: Check that we can use more fusion methods with Spectral
     cluster_methods = ['spectral']
-    fusion_methods = ['disagreement']
+    fusion_methods = ['agreement']  # MUST ALWAYS BE AGREEMENT FOR SPECTRAL
 
     # Set up parameters for the genetic algorithm                                               Index
     toolbox.register("c_1_type", random.choice, cluster_methods)                                # 0
@@ -430,13 +429,13 @@ def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, n_neighbors_min
 
     # TODO: Let user define this
     N_CYCLES = 1
-    toolbox.register("individual", tools.initCycle, creator.Individual, 
+    toolbox.register("individual", tools.initCycle, creator.Individual,
         (toolbox.c_1_type, toolbox.c_1_n_neighbors, toolbox.c_1_k,
         toolbox.c_2_type, toolbox.c_2_n_neighbors, toolbox.c_2_k,
         toolbox.c_1_pre_type, toolbox.c_1_pre_n_neighbors, toolbox.c_1_pre_k,
         toolbox.c_2_pre_type, toolbox.c_2_pre_n_neighbors, toolbox.c_2_pre_k,
         toolbox.fusion_method), n=N_CYCLES)
-    
+
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     def mutate(individual):
@@ -463,7 +462,7 @@ def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, n_neighbors_min
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
 
-            sil = parea_1(data,
+            sil = parea_1_spectral(data,
                           individual[0],
                           individual[1],
                           individual[2],
