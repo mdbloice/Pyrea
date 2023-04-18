@@ -344,7 +344,6 @@ class Disagreement(Fusion):
             res = np.matrix(res)
             labels = labels + res
 
-        # return np.fill_diagonal(labels, 0)
         return labels
 
 
@@ -374,7 +373,10 @@ class Agreement(Fusion):
             res = np.matrix(res)
             labels = labels + res
 
-        return np.fill_diagonal(labels, 0)
+        # in_place=False does not work, we have to edit the matrix in place
+        # labels = np.fill_diagonal(labels, 0, in_place=False)
+        np.fill_diagonal(labels, 0)
+        return labels
 
 
 class Consensus(Fusion):
