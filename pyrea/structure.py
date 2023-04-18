@@ -138,7 +138,7 @@ class SpectralClusteringPyrea(Clusterer):
                        random_state=None,
                        n_init=10,
                        gamma=1.0,
-                       affinity='rbf',
+                       affinity='nearest_neighbors',
                        n_neighbors=10,
                        eigen_tol=0.0,
                        assign_labels='kmeans',
