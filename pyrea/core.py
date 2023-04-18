@@ -17,12 +17,10 @@ from typing import List, Union
 import numpy as np
 import warnings
 from sklearn.metrics import silhouette_score
+from operator import itemgetter
 
 # Genetic algorithm imports
-from deap import base
-from deap import creator
-from deap import tools
-from deap import algorithms
+from deap import base, creator, tools, algorithms
 
 from .structure import Agreement, Clusterer, DBSCANPyrea, Disagreement
 from .structure import Ensemble, Fusion, HierarchicalClusteringPyrea
@@ -252,6 +250,207 @@ def summary():
     print("\n")
 
     print(f" End Summary ".center(80, "*"))
+
+def parea_2_mv(data: list, clusterers: list, methods: list, k_s: list, precomputed_clusterers: list, precomputed_methods: list, precomputed_k_s: list, fusion_method='disagreement', fitness=False, k_final=None):
+
+    # Sanity check
+    if not len(data) == len(clusterers) == len(methods) == len(k_s):
+        raise ValueError("The number of views, clusterers, methods and k_s must be equal.")
+
+    if not len(precomputed_clusterers) == len(precomputed_methods) == len(precomputed_k_s):
+        raise ValueError("The number of precomputed clusterers, precomputed methods and precomputed k_s must be equal.")
+
+    # create a structure based on the number of views
+    n_views = len(data)
+
+    # Clustering algorithms
+    clustering_algorithms = [None] * n_views
+    for i in range(n_views):
+        clustering_algorithms[i] = clusterer(clusterers[i], method=methods[i], n_clusters=k_s[i])
+
+    # Pre-computed clustering algorithms
+    precomputed_clustering_algorithms = [None] * len(precomputed_clusterers)
+    for i in range(n_views):
+        precomputed_clustering_algorithms[i] = clusterer(precomputed_clusterers[i], method=precomputed_methods[i], n_clusters=precomputed_k_s[i], precomputed=True)
+
+    # Create the views
+    # TODO: Check if n_views is correct here...
+    views = [None] * n_views
+    for i in range(n_views):
+        views[i] = view(data[i], clustering_algorithms[i])
+
+    # Create fusion algorithm
+    f = fuser(fusion_method)
+
+    # Create ensemble
+    v_res = execute_ensemble(views, f)
+
+    # Always set to the 0th precomputed clustering algorithm and method...
+    # TODO: Can/should this be changed?
+    if k_final:
+        c_final = clusterer(precomputed_clusterers[0], method=precomputed_methods[0], n_clusters=k_final, precomputed=True)
+        v_res_final = view(v_res, c_final)
+        labels = v_res_final.execute()
+
+        # Remove the last dimension of the labels, could also use np.squeeze, but requires 1.7 or higher
+        labels = labels[:,0]
+    else:
+        v_res_array = [None] * len(precomputed_clusterers)
+
+        for i in range(len(precomputed_clusterers)):
+            v_res_array[i] = view(v_res, precomputed_clustering_algorithms[i])
+
+        # Get the final cluster solution
+        labels = consensus([v_res.execute() for v_res in v_res_array])
+
+    if fitness:
+        return silhouette_score(v_res, labels, metric='precomputed')
+    else:
+        return labels
+
+def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None):
+
+    print("Starting parea 2 genetic...")
+
+    if not hasattr(creator, "FitnessMax"):
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+
+    if not hasattr(creator, "Individual"):
+        creator.create("Individual", list, fitness=creator.FitnessMax)
+
+    # Create the toolbox
+    toolbox = base.Toolbox()
+
+    cluster_methods = ['hierarchical']
+    fusion_methods = ['disagreement']
+    linkages = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward', 'ward2']
+
+    # Attribute generator
+    n = len(data)
+    names = []
+    c_indices = []
+
+    # Create our clusterers
+    for i in range(n):
+        toolbox.register("c_%d_type" % i, random.choice, cluster_methods)
+        names.append("c_%d_type" % i)
+
+    # Create our methods
+    for i in range(n):
+        toolbox.register("c_%d_method" % i, random.choice, linkages)
+        names.append("c_%d_method" % i)
+
+    # Create our k_s
+    for i in range(n):
+        toolbox.register("c_%d_k" % i, random.randint, k_min, k_max)
+        names.append("c_%d_k" % i)
+
+    # Create our precomputed clusterers
+    for i in range(n):
+        toolbox.register("c_%d_pre_type" % i, random.choice, cluster_methods)
+        names.append("c_%d_pre_type" % i)
+
+    # Create our precomputed methods
+    for i in range(n):
+        toolbox.register("c_%d_pre_method" % i, random.choice, linkages)
+        names.append("c_%d_pre_method" % i)
+
+    # Create our precomputed k_s
+    for i in range(n):
+        toolbox.register("c_%d_pre_k" % i, random.randint, k_min, k_max)
+        names.append("c_%d_pre_k" % i)
+
+    toolbox.register("fusion_method", random.choice, fusion_methods)
+    names.append("fusion_method")
+
+    to_pass = tuple([getattr(toolbox, name) for name in names])
+
+    # Chromosome structure initialiser
+    N_CYCLES = 1
+    toolbox.register("individual", tools.initCycle, creator.Individual, to_pass, N_CYCLES)
+
+    # Population initialiser
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    # Index builder
+    clusterers_index        = [*range(0, len(data))]
+    methods_index           = [*range(len(data)*1, len(data)*2)]
+    k_s_index               = [*range(len(data)*2, len(data)*3)]
+    pre_clusterers_index    = [*range(len(data)*3, len(data)*4)]
+    pre_methods_index       = [*range(len(data)*4, len(data)*5)]
+    pre_k_s_index           = [*range(len(data)*5, len(data)*6)]
+    f_index                 = len(names)-1
+
+    # Mutation function
+    def mutate(individual):
+        """
+        Mutates an individual by randomly changing a single parameter.
+        """
+        index = random.randint(0, len(individual) - 1)
+        gene = individual[index]
+
+        # TODO: replace with indices above.
+        if gene in [*range(0, len(data))]:
+            individual[gene] = random.choice(cluster_methods)
+        elif gene in [*range(len(data)*1, len(data)*2)]:
+            individual[gene] = random.choice(linkages)
+        elif gene in [*range(len(data)*2, len(data)*3)]:
+            individual[gene] = random.randint(k_min, k_max)
+        elif gene in [*range(len(data)*3, len(data)*4)]:
+            individual[gene] = random.choice(cluster_methods)
+        elif gene in [*range(len(data)*4, len(data)*5)]:
+            individual[gene] = random.choice(linkages)
+        elif gene in [*range(len(data)*5, len(data)*6)]:
+            individual[gene] = random.randint(k_min, k_max)
+        elif gene == len(names)-1:
+            individual[gene] = random.choice(fusion_methods)
+
+        return individual,
+
+    def evaluate(individual):
+
+        # sklearn uses np.matrix which throws a warning as it is deprecated
+        # Use this to silence the warning
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+
+            sil = parea_2_mv(data,
+                            clusterers=itemgetter(*clusterers_index)(individual),
+                            methods=itemgetter(*methods_index)(individual),
+                            k_s=itemgetter(*k_s_index)(individual),
+                            precomputed_clusterers=itemgetter(*pre_clusterers_index)(individual),
+                            precomputed_methods=itemgetter(*pre_methods_index)(individual),
+                            precomputed_k_s=itemgetter(*pre_k_s_index)(individual),
+                            fusion_method=individual[f_index],
+                            fitness=True, k_final=k_final)
+
+        print("Silhouette score: %s" % sil)
+
+        return sil,
+
+    # Register the functions
+    # TODO: Try other crossover methods and tournament sizes, etc.
+    toolbox.register("mate", tools.cxOnePoint)
+    toolbox.register("mutate", mutate)
+    toolbox.register("select", tools.selTournament, tournsize=2)
+    toolbox.register("evaluate", evaluate)
+
+    # Create the population
+    population = toolbox.population(n=100)
+    hall_of_fame = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+
+    stats.register("avg", np.mean)
+    stats.register("std", np.std)
+    stats.register("min", np.min)
+    stats.register("max", np.max)
+
+    # TODO: Work out if pop and log should also be returned
+    pop, log = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=10, stats=stats, halloffame=hall_of_fame, verbose=True)
+
+    print(f"\nSummary:\n{log}")
+
+    return hall_of_fame[0]
 
 def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
             c_2_type='hierarchical', c_2_method='complete', c_2_k=2,
