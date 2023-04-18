@@ -662,20 +662,20 @@ def parea_1_genetic_spectral(data: list, k_min: int, k_max: int, n_neighbors_min
             warnings.simplefilter("ignore")
 
             sil = parea_1_spectral(data,
-                          individual[0],
-                          individual[1],
-                          individual[2],
-                          individual[3],
-                          individual[4],
-                          individual[5],
-                          individual[6],
-                          individual[7],
-                          individual[8],
-                          individual[9],
-                          individual[10],
-                          individual[11],
-                          individual[12],
-                          fitness=True, k_final=k_final)
+                            individual[0],
+                            individual[1],
+                            individual[2],
+                            individual[3],
+                            individual[4],
+                            individual[5],
+                            individual[6],
+                            individual[7],
+                            individual[8],
+                            individual[9],
+                            individual[10],
+                            individual[11],
+                            individual[12],
+                            fitness=True, k_final=k_final)
 
         print("Silhouette score: %s" % sil)
 
@@ -751,11 +751,11 @@ def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
     # TODO: Add user parameter for N_CYCLES
     N_CYCLES = 1
     toolbox.register("individual", tools.initCycle, creator.Individual,
-                     (toolbox.c_1_type, toolbox.c_1_method, toolbox.c_1_k,
-                      toolbox.c_2_type, toolbox.c_2_method, toolbox.c_2_k,
-                      toolbox.c_1_pre_type, toolbox.c_1_pre_method, toolbox.c_1_pre_k,
-                      toolbox.c_2_pre_type, toolbox.c_2_pre_method, toolbox.c_2_pre_k,
-                      toolbox.fusion_method), n=N_CYCLES)
+                        (toolbox.c_1_type, toolbox.c_1_method, toolbox.c_1_k,
+                        toolbox.c_2_type, toolbox.c_2_method, toolbox.c_2_k,
+                        toolbox.c_1_pre_type, toolbox.c_1_pre_method, toolbox.c_1_pre_k,
+                        toolbox.c_2_pre_type, toolbox.c_2_pre_method, toolbox.c_2_pre_k,
+                        toolbox.fusion_method), n=N_CYCLES)
 
     # How the population is created
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -792,20 +792,20 @@ def parea_1_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
             warnings.simplefilter("ignore")
 
             sil = parea_1(data,
-                          individual[0],
-                          individual[1],
-                          individual[2],
-                          individual[3],
-                          individual[4],
-                          individual[5],
-                          individual[6],
-                          individual[7],
-                          individual[8],
-                          individual[9],
-                          individual[10],
-                          individual[11],
-                          individual[12],
-                          fitness=True, k_final=k_final)
+                            individual[0],
+                            individual[1],
+                            individual[2],
+                            individual[3],
+                            individual[4],
+                            individual[5],
+                            individual[6],
+                            individual[7],
+                            individual[8],
+                            individual[9],
+                            individual[10],
+                            individual[11],
+                            individual[12],
+                            fitness=True, k_final=k_final)
 
         print("Silhouette score: %s" % sil)
 
@@ -1010,21 +1010,21 @@ def parea_2_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
                             individual[2],
                             individual[3],
                             individual[4],
-                          individual[5],
-                          individual[6],
-                          individual[7],
-                          individual[8],
-                          individual[9],
-                          individual[10],
-                          individual[11],
-                          individual[12],
-                          individual[13],
-                          individual[14],
-                          individual[15],
-                          individual[16],
-                          individual[17],
-                          individual[18],
-                          fitness=True, k_final=k_final)
+                            individual[5],
+                            individual[6],
+                            individual[7],
+                            individual[8],
+                            individual[9],
+                            individual[10],
+                            individual[11],
+                            individual[12],
+                            individual[13],
+                            individual[14],
+                            individual[15],
+                            individual[16],
+                            individual[17],
+                            individual[18],
+                            fitness=True, k_final=k_final)
 
         print("Silhouette score: %s" % sil)
 
