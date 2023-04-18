@@ -308,7 +308,7 @@ def parea_2_mv(data: list, clusterers: list, methods: list, k_s: list, precomput
     else:
         return labels
 
-def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None):
+def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, n_population=100, n_generations=10):
 
     print("Starting parea 2 genetic...")
 
@@ -381,6 +381,8 @@ def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, N
     pre_k_s_index           = [*range(len(data)*5, len(data)*6)]
     f_index                 = len(names)-1
 
+    print(names)
+
     # Mutation function
     def mutate(individual):
         """
@@ -436,7 +438,7 @@ def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, N
     toolbox.register("evaluate", evaluate)
 
     # Create the population
-    population = toolbox.population(n=100)
+    population = toolbox.population(n=n_population)
     hall_of_fame = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
 
@@ -446,7 +448,7 @@ def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, N
     stats.register("max", np.max)
 
     # TODO: Work out if pop and log should also be returned
-    pop, log = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=10, stats=stats, halloffame=hall_of_fame, verbose=True)
+    pop, log = algorithms.eaSimple(population, toolbox, cxpb=0.7, mutpb=0.2, ngen=n_generations, stats=stats, halloffame=hall_of_fame, verbose=True)
 
     print(f"\nSummary:\n{log}")
 
@@ -1053,3 +1055,33 @@ def parea_2_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
     print(f"\nSummary:\n{log}")
 
     return hall_of_fame[0]
+
+def convert_to_parameters(data, params):
+    """
+    A helper function to convert the learned parameters of a genetic algorithm
+    search of Parea 2. See the project's Jupyer notebooks on GitHub for details.
+    """
+    clusterers_index        = [*range(0, len(data))]
+    methods_index           = [*range(len(data)*1, len(data)*2)]
+    k_s_index               = [*range(len(data)*2, len(data)*3)]
+    pre_clusterers_index    = [*range(len(data)*3, len(data)*4)]
+    pre_methods_index       = [*range(len(data)*4, len(data)*5)]
+    pre_k_s_index           = [*range(len(data)*5, len(data)*6)]
+
+    all_indices = clusterers_index + methods_index + k_s_index + pre_clusterers_index + pre_methods_index + pre_k_s_index
+
+    #clusterers              = itemgetter(*clusterers_index)(params)
+    #methods                 = itemgetter(*methods_index)(params)
+    #k_s                     = itemgetter(*k_s_index)(params)
+    #precomputed_clusterers  = itemgetter(*pre_clusterers_index)(params)
+    #precomputed_methods     = itemgetter(*pre_methods_index)(params)
+    #precomputed_k_s         = itemgetter(*pre_k_s_index)(params)
+    #fusion_index            = len(all_indices) - 1
+
+    return {"clusterers": list(itemgetter(*clusterers_index)(params)), 
+            "methods": list(itemgetter(*methods_index)(params)), 
+            "k_s": list(itemgetter(*k_s_index)(params)),  
+            "precomputed_clusterers": list(itemgetter(*pre_clusterers_index)(params)),
+            "precomputed_methods": list(itemgetter(*pre_methods_index)(params)), 
+            "precomputed_k_s": list(itemgetter(*pre_k_s_index)(params)), 
+            "fusion_method": params[-1]}
