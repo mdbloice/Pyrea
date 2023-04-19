@@ -310,8 +310,6 @@ def parea_2_mv(data: list, clusterers: list, methods: list, k_s: list, precomput
 
 def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None] = None, n_population=100, n_generations=10):
 
-    print("Starting parea 2 genetic...")
-
     if not hasattr(creator, "FitnessMax"):
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 
@@ -330,35 +328,35 @@ def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, N
     names = []
     c_indices = []
 
-    # Create our clusterers
+    # Create our clusterers. We do not want 0-based names so i+1 is used to generate the name strings.
     for i in range(n):
-        toolbox.register("c_%d_type" % i, random.choice, cluster_methods)
-        names.append("c_%d_type" % i)
+        toolbox.register("c_%d_type" % i+1, random.choice, cluster_methods)
+        names.append("c_%d_type" % i+1)
 
     # Create our methods
     for i in range(n):
-        toolbox.register("c_%d_method" % i, random.choice, linkages)
-        names.append("c_%d_method" % i)
+        toolbox.register("c_%d_method" % i+1, random.choice, linkages)
+        names.append("c_%d_method" % i+1)
 
     # Create our k_s
     for i in range(n):
-        toolbox.register("c_%d_k" % i, random.randint, k_min, k_max)
-        names.append("c_%d_k" % i)
+        toolbox.register("c_%d_k" % i+1, random.randint, k_min, k_max)
+        names.append("c_%d_k" % i+1)
 
     # Create our precomputed clusterers
     for i in range(n):
-        toolbox.register("c_%d_pre_type" % i, random.choice, cluster_methods)
-        names.append("c_%d_pre_type" % i)
+        toolbox.register("c_%d_pre_type" % i+1, random.choice, cluster_methods)
+        names.append("c_%d_pre_type" % i+1)
 
     # Create our precomputed methods
     for i in range(n):
-        toolbox.register("c_%d_pre_method" % i, random.choice, linkages)
-        names.append("c_%d_pre_method" % i)
+        toolbox.register("c_%d_pre_method" % i+1, random.choice, linkages)
+        names.append("c_%d_pre_method" % i+1)
 
     # Create our precomputed k_s
     for i in range(n):
-        toolbox.register("c_%d_pre_k" % i, random.randint, k_min, k_max)
-        names.append("c_%d_pre_k" % i)
+        toolbox.register("c_%d_pre_k" % i+1, random.randint, k_min, k_max)
+        names.append("c_%d_pre_k" % i+1)
 
     toolbox.register("fusion_method", random.choice, fusion_methods)
     names.append("fusion_method")
@@ -452,7 +450,8 @@ def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, N
 
     print(f"\nSummary:\n{log}")
 
-    return hall_of_fame[0]
+    # We need to convert the optimal parameters to a format understood by the parea_2_mv function.
+    return convert_to_parameters(len(data), hall_of_fame[0])
 
 def parea_1(data: list, c_1_type='hierarchical', c_1_method='ward', c_1_k=2,
             c_2_type='hierarchical', c_2_method='complete', c_2_k=2,
@@ -1056,32 +1055,22 @@ def parea_2_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, None
 
     return hall_of_fame[0]
 
-def convert_to_parameters(data, params):
+def convert_to_parameters(data_len, params):
     """
     A helper function to convert the learned parameters of a genetic algorithm
     search of Parea 2. See the project's Jupyer notebooks on GitHub for details.
     """
-    clusterers_index        = [*range(0, len(data))]
-    methods_index           = [*range(len(data)*1, len(data)*2)]
-    k_s_index               = [*range(len(data)*2, len(data)*3)]
-    pre_clusterers_index    = [*range(len(data)*3, len(data)*4)]
-    pre_methods_index       = [*range(len(data)*4, len(data)*5)]
-    pre_k_s_index           = [*range(len(data)*5, len(data)*6)]
+    clusterers_index        = [*range(0, data_len)]
+    methods_index           = [*range(data_len*1, data_len*2)]
+    k_s_index               = [*range(data_len*2, data_len*3)]
+    pre_clusterers_index    = [*range(data_len*3, data_len*4)]
+    pre_methods_index       = [*range(data_len*4, data_len*5)]
+    pre_k_s_index           = [*range(data_len*5, data_len*6)]
 
-    all_indices = clusterers_index + methods_index + k_s_index + pre_clusterers_index + pre_methods_index + pre_k_s_index
-
-    #clusterers              = itemgetter(*clusterers_index)(params)
-    #methods                 = itemgetter(*methods_index)(params)
-    #k_s                     = itemgetter(*k_s_index)(params)
-    #precomputed_clusterers  = itemgetter(*pre_clusterers_index)(params)
-    #precomputed_methods     = itemgetter(*pre_methods_index)(params)
-    #precomputed_k_s         = itemgetter(*pre_k_s_index)(params)
-    #fusion_index            = len(all_indices) - 1
-
-    return {"clusterers": list(itemgetter(*clusterers_index)(params)), 
-            "methods": list(itemgetter(*methods_index)(params)), 
-            "k_s": list(itemgetter(*k_s_index)(params)),  
+    return {"clusterers": list(itemgetter(*clusterers_index)(params)),
+            "methods": list(itemgetter(*methods_index)(params)),
+            "k_s": list(itemgetter(*k_s_index)(params)),
             "precomputed_clusterers": list(itemgetter(*pre_clusterers_index)(params)),
-            "precomputed_methods": list(itemgetter(*pre_methods_index)(params)), 
-            "precomputed_k_s": list(itemgetter(*pre_k_s_index)(params)), 
+            "precomputed_methods": list(itemgetter(*pre_methods_index)(params)),
+            "precomputed_k_s": list(itemgetter(*pre_k_s_index)(params)),
             "fusion_method": params[-1]}
