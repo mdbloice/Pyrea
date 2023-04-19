@@ -27,6 +27,15 @@ pip install pyrea
 
 This will install the latest version of Pyrea from PyPI.
 
+## Demonstration Notebooks
+A demonstration of Pyrea's usage on the Nutrimouse dataset can be found in the following Jupyter notebook:
+
+- [Nutrimouse.ipynb](https://github.com/mdbloice/Pyrea/blob/master/notebooks/Nutrimouse.ipynb)
+
+In this notebook, hierarchical and spectral clustering are performed on the Nutrimouse multi-view dataset, tuned using Pyrea's genetic algorithm functionality.
+
+More notebooks will be added in due course.
+
 ## Usage
 The Pyrea software package is the accompanying software for our paper:
 
