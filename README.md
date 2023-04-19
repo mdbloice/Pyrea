@@ -95,7 +95,9 @@ and calling `pyrea_2()` as follows:
 pyrea.parea_2(data, params, k_final=3)
 ```
 
-**Note**: Currently the genetic algorithm uses a population size of 100 and runs for 10 generations. This function will be updated to allow these parameters to be customised in the near future.
+#### Genetic Algorithm Update
+
+The genetic algorithm functions now support arbitrary numbers of views, and the population and number of generations can now be adjusted. See [this notebook](https://github.com/mdbloice/Pyrea/blob/master/notebooks/Nutrimouse.ipynb) for a demonstration of this usage on the Nutrimouse dataset.
 
 ### API
 
