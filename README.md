@@ -39,7 +39,7 @@ More notebooks will be added in due course.
 ## Usage
 The Pyrea software package is the accompanying software for our paper:
 
-Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2023). *Parea: multi-view ensemble clustering for cancer subtype discovery*. Journal of Biomedical Informatics. <https://doi.org/10.1016/j.jbi.2023.104406>
+Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2023). *Parea: multi-view ensemble clustering for cancer subtype discovery*. **Journal of Biomedical Informatics**. <https://doi.org/10.1016/j.jbi.2023.104406>
 
 While Pyrea allows for flexible and custom architectures to be built, two structures are discussed specifically in the paper cited above, namely Parea 1 and Parea 2.
 
