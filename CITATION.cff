@@ -18,7 +18,7 @@ preferred-citation:
     given-names: "Marcus D."
   - family-names: "Schimek"
     given-names: "Michael G."
-  doi: "10.48550/ARXIV.2209.15399"
-  journal: "arXiv"
+  doi: "10.1016/j.jbi.2023.104406"
+  journal: "Journal of Biomedical Informatics"
   title: "Parea: multi-view ensemble clustering for cancer subtype discovery"
-  year: 2022
+  year: 2023
