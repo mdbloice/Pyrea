@@ -303,7 +303,7 @@ See the `parea_2()` helper function for a pre-built version of structure above.
 ## Extensible
 Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusion techniques with custom clustering algorithms that can be loaded in to Pyrea at run-time.
 
-By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.io/pyrea/extending.html#custom-clustering-algorithms) for details.
+By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.io/en/latest/extending.html) for details.
 
 # Work In Progress and Future Work
 Several features are currently work in progress, future updates will include
