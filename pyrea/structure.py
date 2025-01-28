@@ -1,7 +1,6 @@
 # Pyrea: Multi-view clustering with deep ensemble structures
 # Copyright (C) 2022 Marcus D. Bloice, Bastian Pfeifer
 #
-#
 # Licenced under the terms of the MIT license.
 #
 # structure.py

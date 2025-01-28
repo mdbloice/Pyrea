@@ -34,8 +34,8 @@ d = np.array([d1, d2, d3])
 
 n_cluster_arrays = np.shape(d)[0]
 cluster_size = np.shape(d)[1]
-n_iter = 10
+n_iterations = 10
 
-c_call = hc_fused.HC_fused_cpp_opt6(d, n_cluster_arrays, cluster_size, n_iter)  # Data, number of arrays, length of one cluster, and the number of iterations
+c_call = hc_fused.HC_fused_cpp_opt6(d, n_cluster_arrays, cluster_size, n_iterations)  # Data, number of arrays, length of one cluster, and the number of iterations
 
 print([i for i in c_call.contents])
