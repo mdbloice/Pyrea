@@ -340,7 +340,7 @@ class Disagreement(Fusion):
         for i in range(0, len(views)):
             l = views[i]
             res = [[int(x != y) for y in l] for x in l]
-            res = np.matrix(res)
+            res = np.array(res)
             labels = labels + res
 
         return labels
@@ -369,7 +369,7 @@ class Agreement(Fusion):
 
             l = views[i]
             res = [[int(x == y) for y in l] for x in l]
-            res = np.matrix(res)
+            res = np.array(res)
             labels = labels + res
 
         # in_place=False does not work, we have to edit the matrix in place
