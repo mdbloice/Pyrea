@@ -330,33 +330,33 @@ def parea_2_mv_genetic(data: list, k_min: int, k_max: int, k_final: Union[int, N
 
     # Create our clusterers. We do not want 0-based names so i+1 is used to generate the name strings.
     for i in range(n):
-        toolbox.register("c_%d_type" % i+1, random.choice, cluster_methods)
-        names.append("c_%d_type" % i+1)
+        toolbox.register(f"c_{i+1}_type", random.choice, cluster_methods)
+        names.append(f"c_{i+1}_type")
 
     # Create our methods
     for i in range(n):
-        toolbox.register("c_%d_method" % i+1, random.choice, linkages)
-        names.append("c_%d_method" % i+1)
+        toolbox.register(f"c_{i+1}_method" % i+1, random.choice, linkages)
+        names.append(f"c_{i+1}_method")
 
     # Create our k_s
     for i in range(n):
-        toolbox.register("c_%d_k" % i+1, random.randint, k_min, k_max)
-        names.append("c_%d_k" % i+1)
+        toolbox.register(f"c_{i+1}_k", random.randint, k_min, k_max)
+        names.append(f"c_{i+1}_k")
 
     # Create our precomputed clusterers
     for i in range(n):
-        toolbox.register("c_%d_pre_type" % i+1, random.choice, cluster_methods)
-        names.append("c_%d_pre_type" % i+1)
+        toolbox.register(f"c_{i+1}_pre_type", random.choice, cluster_methods)
+        names.append(f"c_{i+1}_pre_type")
 
     # Create our precomputed methods
     for i in range(n):
-        toolbox.register("c_%d_pre_method" % i+1, random.choice, linkages)
-        names.append("c_%d_pre_method" % i+1)
+        toolbox.register(f"c_{i+1}_pre_method", random.choice, linkages)
+        names.append(f"c_{i+1}_pre_method")
 
     # Create our precomputed k_s
     for i in range(n):
-        toolbox.register("c_%d_pre_k" % i+1, random.randint, k_min, k_max)
-        names.append("c_%d_pre_k" % i+1)
+        toolbox.register(f"c_{i+1}_pre_k", random.randint, k_min, k_max)
+        names.append(f"c_{i+1}_pre_k")
 
     toolbox.register("fusion_method", random.choice, fusion_methods)
     names.append("fusion_method")
