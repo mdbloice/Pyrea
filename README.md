@@ -183,17 +183,26 @@ See [the graph API guide](docs/source/graphs.rst) for functional construction,
 custom blocks, sample alignment, parameter search, and compatibility details.
 
 ## Demonstration Notebooks
-A demonstration of Pyrea's usage on the Nutrimouse dataset can be found in the following Jupyter notebook:
 
-- [Nutrimouse.ipynb](https://github.com/mdbloice/Pyrea/blob/master/notebooks/Nutrimouse.ipynb)
+- [Nutrimouse graph tutorial](notebooks/Nutrimouse_Graphs.ipynb): executable
+  examples of functional graph construction, `Module.forward()` composition,
+  custom blocks and topologies, NetworkX traversal, Parea graph builders,
+  spectral affinities, and parameter trials. The small Nutrimouse CSV dataset
+  is bundled with provenance so the notebook runs without downloading data or
+  installing `mvlearn`. Its evaluation tables are computed from the current run.
+- [Original Nutrimouse notebook](notebooks/Nutrimouse.ipynb): the earlier eager
+  API demonstration using hierarchical and spectral clustering with genetic
+  helpers and comparisons against `mvlearn` algorithms. It requires the optional
+  `mvlearn` dependency and has not been migrated to the graph API.
 
-In this notebook, hierarchical and spectral clustering are performed on the Nutrimouse multi-view dataset, tuned using Pyrea's genetic algorithm functionality.
+To run the new graph tutorial, install the development checkout and the optional
+notebook dependencies from the repository root:
 
-The notebook uses the older eager API and requires the optional `mvlearn`
-dependency, which is not installed by the core package. It has not been
-migrated to the graph API.
-
-More notebooks will be added in due course.
+```bash
+python -m pip install -e .
+python -m pip install -r notebooks/requirements.txt
+jupyter lab notebooks/Nutrimouse_Graphs.ipynb
+```
 
 ## Paper and eager API
 The Pyrea software package is the accompanying software for our paper:

@@ -1,0 +1,5 @@
+# Install Pyrea from the repository root with: python -m pip install -e .
+# These are optional tools for running and plotting the example notebooks.
+jupyterlab>=4
+ipykernel>=6
+matplotlib>=3.5
