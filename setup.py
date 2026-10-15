@@ -50,6 +50,7 @@ setup(
         'scikit-learn>1.1.0',
         'scipy>1.5.4',
         'deap>1.3.0',
+        'networkx>=2.5',
     ],
     classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f]
 )

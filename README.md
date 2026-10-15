@@ -4,7 +4,7 @@
      <img src="https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/Pyrea/Pyrea-logos_transparent.png" width="400">
 </p>
 <p align="center">
-     Multi-view clustering with flexible ensemble structures.
+     Multi-view clustering with custom, executable ensemble graphs.
 </p>
 <p align="center">
      <a href="https://pypi.org/project/pyrea/"><img src="https://img.shields.io/pypi/v/Pyrea"></a>
@@ -19,13 +19,168 @@
 
 ## Installation
 
-Install Pyrea using `pip`:
+Install the latest published release from PyPI:
 
 ```bash
 pip install pyrea
 ```
 
-This will install the latest version of Pyrea from PyPI.
+The graph API described below is part of the development checkout. To use it
+before it is included in a published release, install from source:
+
+```bash
+git clone https://github.com/mdbloice/Pyrea.git
+cd Pyrea
+python -m pip install -e .
+```
+
+This installs the Python dependencies, including NetworkX. No C/C++ compilation
+or PyTorch installation is needed for the graph workflow.
+
+## Building ensemble graphs
+
+The development version includes a NetworkX-based API for custom ensemble
+topologies. Use executable blocks from `pyrea.nn` directly, or compose them in
+a class with a `forward()` method:
+
+```python
+import numpy as np
+from pyrea import nn
+
+
+class MyEnsemble(nn.Module):
+    def __init__(self, n_clusters=3):
+        self.rna_cluster = nn.Hierarchical(n_clusters, method='ward')
+        self.meth_cluster = nn.Hierarchical(n_clusters, method='complete')
+        self.fusion = nn.Fusion('disagreement')
+        self.final = nn.Hierarchical(n_clusters, input_kind=nn.DISTANCE)
+
+    def forward(self, rna, methylation):
+        first = self.rna_cluster(rna)
+        second = self.meth_cluster(methylation)
+        return self.final(self.fusion(first, second))
+
+
+model = MyEnsemble().compile()  # Builds the graph without executing clustering.
+
+# Two views of the same 30 samples, with different numbers of features.
+rng = np.random.RandomState(42)
+data_rna = rng.normal(size=(30, 8))
+data_methylation = rng.normal(size=(30, 5))
+labels = model(rna=data_rna, methylation=data_methylation)
+assert labels.shape == (30,)
+
+print(model.get_params())
+trial = model.with_params(final__n_clusters=4, rna_cluster__method='average')
+trial_labels = trial(rna=data_rna, methylation=data_methylation)
+```
+
+This follows the `Module`/`forward()` composition style familiar from PyTorch.
+Calling a module directly on arrays executes it eagerly; `compile()` records
+its block connections as a directed acyclic graph (DAG).
+
+Graphs support branches of different depths, shared intermediate results,
+multiple fusion stages, and named outputs. Execution follows dependency order
+and computes shared nodes once per invocation. `model.graph` exposes a frozen
+NetworkX graph for breadth-first traversal, inspection, and visualization.
+Custom operations can subclass `nn.Block` or wrap a callable with `nn.Function`.
+No PyTorch dependency is required.
+
+### Functional construction and custom topologies
+
+You can also connect blocks directly using symbolic inputs. This example
+creates two branches, fuses their cluster assignments, and exposes both final
+labels and the fused distance matrix:
+
+```python
+rna = nn.Input('rna')
+methylation = nn.Input('methylation')
+
+first = nn.Hierarchical(3, method='ward')(rna)
+second = nn.Hierarchical(3, method='average')(methylation)
+distance = nn.Fusion('disagreement')(first, second)
+final = nn.Hierarchical(3, input_kind=nn.DISTANCE)(distance)
+
+custom = nn.Graph(
+    inputs={'rna': rna, 'methylation': methylation},
+    outputs={'labels': final, 'distance': distance},
+)
+result = custom(rna=data_rna, methylation=data_methylation)
+assert result['distance'].shape == (30, 30)
+```
+
+For reusable custom operations, subclass `nn.Block` and implement `forward()`.
+To adapt an existing callable, use `nn.Function` with declared input and output
+kinds. Compositions can nest other modules and connect any number of branches
+and fusion stages. Cycles are rejected.
+
+All input views must contain the same samples in the same order. Use pandas
+DataFrames or `nn.SampleData(array, sample_ids)` to validate identifiers across
+identified inputs; bare arrays use positional alignment. Connections distinguish
+features, labels, distances, and affinities. For example, disagreement fusion
+produces distances, while agreement fusion produces affinities; downstream
+blocks must accept the corresponding kind. `nn.Consensus()` returns the strict
+consensus labels, which may contain more clusters than its input partitions.
+
+### Graph traversal and parameter search
+
+```python
+import networkx as nx
+
+reachable = list(nx.bfs_tree(model.graph, source='rna'))
+execution_order = list(nx.topological_sort(model.graph))
+```
+
+Breadth-first traversal helps inspect a topology. Execution uses topological
+ordering so a block waits for all its inputs, including branches of different
+depths. Shared nodes execute once per call, and results are not cached across
+calls with new data. Execution is currently sequential.
+
+`get_params()` exposes configuration using `block_name__parameter` keys, as in
+the first example. `with_params()` creates an independent configured copy for
+an optimization trial. Custom blocks can expose their own parameters through
+`get_params()` and `set_params()`. These hooks support parameter search over
+custom graphs; a general graph optimizer or topology search is not yet included.
+
+### Predefined Parea graphs
+
+```python
+from pyrea import models
+
+parea1 = models.parea_1(
+    ['rna', 'methylation'], methods=('ward', 'complete'), n_clusters=3
+)
+parea2 = models.parea_2(
+    ['rna', 'methylation'], methods=('ward', 'average'), n_clusters=3,
+    return_matrix=True,
+)
+labels = parea1(rna=data_rna, methylation=data_methylation)
+result = parea2(rna=data_rna, methylation=data_methylation)
+```
+
+These builders use the same public API available for custom topologies and
+support any positive number of input views. Parea 1 takes two initial methods;
+Parea 2 takes one per view and defaults to Ward for every view when methods are
+omitted. `precomputed_methods` selects methods for subsequent clustering.
+`k_final` selects a single final clustering with a fixed number of clusters
+instead of strict consensus. `return_matrix=True` returns named `labels` and
+`distance` outputs. Both builders use Python disagreement fusion; HCfused is
+not used.
+
+### Compatibility
+
+The existing eager API (`pyrea.view`, `pyrea.execute_ensemble`,
+`pyrea.parea_1`, and `pyrea.parea_2`) remains available. The new
+`pyrea.models.parea_1` and `pyrea.models.parea_2` builders return graphs;
+the older top-level helpers execute directly on data.
+
+This update also fixes three existing behaviors: hierarchical clustering now
+honors the selected linkage method and optimal ordering, DBSCAN returns its
+labels, and fusion/consensus correctly handle SciPy's column-shaped labels.
+Results previously affected by these bugs can change.
+
+See [the graph API guide](docs/source/graphs.rst) for functional construction,
+custom blocks, sample alignment, parameter search, and compatibility details.
 
 ## Demonstration Notebooks
 A demonstration of Pyrea's usage on the Nutrimouse dataset can be found in the following Jupyter notebook:
@@ -34,9 +189,13 @@ A demonstration of Pyrea's usage on the Nutrimouse dataset can be found in the f
 
 In this notebook, hierarchical and spectral clustering are performed on the Nutrimouse multi-view dataset, tuned using Pyrea's genetic algorithm functionality.
 
+The notebook uses the older eager API and requires the optional `mvlearn`
+dependency, which is not installed by the core package. It has not been
+migrated to the graph API.
+
 More notebooks will be added in due course.
 
-## Usage
+## Paper and eager API
 The Pyrea software package is the accompanying software for our paper:
 
 Pfeifer, B., Bloice, M.D., & Schimek, M.G. (2023). *Parea: multi-view ensemble clustering for cancer subtype discovery*. **Journal of Biomedical Informatics**. <https://doi.org/10.1016/j.jbi.2023.104406>
@@ -61,11 +220,15 @@ labels = pyrea.parea_2(data)
 
 which executes Parea 2.
 
-Default parameters are used which match those used in our experiments discussed in the paper referenced above. These default parameters can of course be overridden. As there are many combinations of parameters that could be used, a genetic algorithm can be utilised to find the optimum parameters, as shown in the next section.
+These helpers use disagreement fusion by default. They implement the ensemble
+structures with Python fusion methods; they do not reproduce the paper's
+HCfused fusion procedure. Parameters can be overridden, and the existing
+genetic helpers search configurations of the predefined eager structures.
 
 ### Genetic Algorithm
 
-The Parea 1 and Parea 2 structures can be optimised using a genetic algorithm in order to find the best combinations of clustering methods, fusion methods, and number of clusters.
+The existing hierarchical genetic helpers search linkage methods and cluster
+counts within the predefined Parea structures, using disagreement fusion.
 
 For example, to find optimal parameters for Parea 2:
 
@@ -98,15 +261,17 @@ Also, you may choose to define the **final** number of clusters returned by the 
 params = pyrea.parea_2_genetic(data, k_min=2, k_max=5, k_final=3)
 ```
 
-and calling `pyrea_2()` as follows:
+and calling `parea_2()` as follows:
 
 ```python
-pyrea.parea_2(data, params, k_final=3)
+pyrea.parea_2(data, *params, k_final=3)
 ```
 
-#### Genetic Algorithm Update
-
-The genetic algorithm functions now support arbitrary numbers of views, and the population and number of generations can now be adjusted. See [this notebook](https://github.com/mdbloice/Pyrea/blob/master/notebooks/Nutrimouse.ipynb) for a demonstration of this usage on the Nutrimouse dataset.
+The fixed `parea_2_genetic` helper expects three views. The older
+`parea_2_mv_genetic` helper currently has a string-formatting failure and is
+not used by the graph API. For custom graph configurations, use the parameter
+search hooks described above; these genetic helpers do not optimize arbitrary
+graph topologies.
 
 ### API
 
@@ -120,11 +285,12 @@ To create a view you must have some data, and a clusterer:
 
 ```python
 import pyrea
+import numpy as np
 
 # Create your data, which must be a 2-dimensional array/matrix.
-d = [[1,2,3],
-     [4,5,6],
-     [7,8,9]]
+d = np.array([[1,2,3],
+              [4,5,6],
+              [7,8,9]])
 
 # Create a clusterer
 c = pyrea.clusterer("hierarchical", n_clusters=2, method='ward')
@@ -196,7 +362,7 @@ v_res = pyrea.view(pyrea.execute_ensemble([v1, v2], f), c_pre)
 v_res.execute()
 ```
 
-## Ensemble Structures
+## Ensemble Structures (eager API)
 Complex structures can be built using Pyrea.
 
 For example, examine the two structures below:
@@ -301,42 +467,40 @@ pyrea.consensus([v1_res.execute(), v2_res.execute(), v3_res.execute()])
 See the `parea_2()` helper function for a pre-built version of structure above.
 
 ## Extensible
-Pyrea has been designed to be extensible. It allows you to use Pyrea's data fusion techniques with custom clustering algorithms that can be loaded in to Pyrea at run-time.
 
-By providing a `View` with a `ClusterMethod` object, it makes providing custom clustering algorithms uncomplicated. See [`Extending Pyrea`](https://pyrea.readthedocs.io/en/latest/extending.html) for details.
+For graph-based ensembles, subclass `nn.Module` to define reusable topologies,
+subclass `nn.Block` for custom executable operations, or use `nn.Function`
+to adapt a callable. See the [graph API guide](docs/source/graphs.rst).
 
-# Work In Progress and Future Work
-Several features are currently work in progress, future updates will include
-the features described in the sections below.
+The eager API also supports custom `Clusterer` implementations associated with
+a `View`. See [`Extending Pyrea`](https://pyrea.readthedocs.io/en/latest/extending.html)
+for that interface.
 
-## HCfused Clustering Algorithm
-A novel fusion technique, developed by one of the authors of this software
-package, named HCfused, will be included soon in a future update.
+## Future work
 
-## General Genetic Optimisation
-The package will be extended to allow for any custom Pyrea structures to be optimised using a genetic algorithm.
+### General genetic optimization
 
-# Compilation of HC Fused C++ Code
-To use the HC Fused method you may need to compile the source code yourself if binaries are not available for your operating system. HC Fused has been implemented in C++, see the `HC_fused_cpp_opt6.cpp` source file for more details.
+The graph API provides configuration and execution hooks for optimizers.
+General genetic optimization of custom graphs and graph-topology search are
+future work. The historical HCfused C++ source remains in the repository for
+reference; integrating it is not part of the current direction.
 
-Pre-compiled binaries are available for Linux and have been tested using Linux only. The instructions below pertain to Linux only. For Windows please consult <https://docs.python.org/3.5/library/ctypes.html#loading-shared-libraries> and use a compiler such as MSVC or MinGW.
+## Tests
 
-To compile HC Fused (and then create a shared library/dynamic library) execute the following on the command line:
-
-```bash
-$ clang++ -c -fPIC HC_fused_cpp_opt6.cpp -o HC_fused_cpp_opt6.o
-```
-
-and then create the `.so` file shared library file:
+After installing the development checkout, run:
 
 ```bash
-$ clang++ HC_fused_cpp_opt6.o -shared -o libhcfused.so
+python -m pip install pytest
+python -m pytest tests -q
 ```
 
-and finally place the `libhcfused.so` file in the root directory of the package's installation directory.
+The suite covers custom DAG execution, shared branches, repeated calls,
+connection and sample alignment checks, parameter trials, clustering methods,
+and Parea graph compatibility. GitHub Actions is configured to install the
+checkout and run these tests on Python 3.8–3.11 with Ubuntu 22.04. The graph
+update has also been validated locally on Python 3.11 with both the prepared
+dependency stack and current dependency versions.
 
-# Tests
-Installation is tested using Python versions 3.8, 3.9, 3.10, and 3.11 on Ubuntu 20.04 LTS only. See the project's Actions for details. The package should also work using Python 3.6 and 3.7 on other operating systems, however.
+## Miscellaneous
 
-# Miscellaneous
 Logo made by Adobe Express Logo Maker: <https://www.adobe.com/express/create/logo>

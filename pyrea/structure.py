@@ -23,6 +23,24 @@ from typing import List, Union, Any
 from scipy.cluster import hierarchy
 from scipy import spatial
 
+
+def _label_vectors(partitions):
+    """Normalize partitions to aligned label vectors, including SciPy columns."""
+    if len(partitions) == 0:
+        raise ValueError('At least one partition is required')
+    labels = []
+    for partition in partitions:
+        partition = np.asarray(partition)
+        if partition.ndim == 2 and partition.shape[1] == 1:
+            partition = partition[:, 0]
+        if partition.ndim != 1 or not len(partition):
+            raise ValueError('Partitions must contain one label per sample')
+        if labels and len(partition) != len(labels[0]):
+            raise ValueError('Partitions must describe the same samples')
+        labels.append(partition)
+    return labels
+
+
 class Clusterer(object):
     """
     :class:`Clusterer` is the Abstract Base Class for all clustering algorithms.
@@ -79,7 +97,8 @@ class HierarchicalClusteringPyrea(Clusterer):
             if self.method == 'ward2':
                 y = y**2
 
-            tree = hierarchy.linkage(y, method='ward', metric=self.metric)
+            tree = hierarchy.linkage(y, method='ward' if self.method == 'ward2' else self.method,
+                                     metric=self.metric, optimal_ordering=self.optimal_ordering)
 
         else:
             y = spatial.distance.pdist(data, metric=self.distance_metric, out=self.out)
@@ -87,7 +106,8 @@ class HierarchicalClusteringPyrea(Clusterer):
             if self.method == 'ward2':
                 y = y**2
 
-            tree = hierarchy.linkage(y, method='ward', metric=self.metric)
+            tree = hierarchy.linkage(y, method='ward' if self.method == 'ward2' else self.method,
+                                     metric=self.metric, optimal_ordering=self.optimal_ordering)
 
         return hierarchy.cut_tree(tree, n_clusters=self.n_clusters, height=self.height)
 
@@ -217,14 +237,14 @@ class DBSCANPyrea(Clusterer):
         self.n_jobs = n_jobs
 
     def execute(self, data) -> list:
-        DBSCAN(eps=self.eps,
-               min_samples=self.min_samples,
-               metric=self.metric,
-               metric_params=self.metric_params,
-               algorithm=self.algorithm,
-               leaf_size=self.leaf_size,
-               p=self.p,
-               n_jobs=self.n_jobs).fit(data).labels_
+        return DBSCAN(eps=self.eps,
+                      min_samples=self.min_samples,
+                      metric=self.metric,
+                      metric_params=self.metric_params,
+                      algorithm=self.algorithm,
+                      leaf_size=self.leaf_size,
+                      p=self.p,
+                      n_jobs=self.n_jobs).fit(data).labels_
 
 
 class OPTICSPyrea(Clusterer):
@@ -334,6 +354,7 @@ class Disagreement(Fusion):
         Executes the disagreement fusion algorithm on the provided clusterings,
         :attr:`views`.
         """
+        views = _label_vectors(views)
         n = len(views[0])
         labels = np.zeros((n, n), dtype=int)
 
@@ -361,6 +382,7 @@ class Agreement(Fusion):
         Executes the agreement fusion algorithm on the provided clusterings,
         :attr:`views`.
         """
+        views = _label_vectors(views)
         n_samp  = len(views[0])
 
         labels  = np.zeros((n_samp, n_samp), dtype=int)
@@ -392,6 +414,7 @@ class Consensus(Fusion):
         Executes the consensus fusion algorithm on the provided clusterings,
         :attr:`views`.
         """
+        views = _label_vectors(views)
         # Start consensus
         n_samp    = len(views[0])
         cl_cons   = np.zeros((n_samp,), dtype=int)

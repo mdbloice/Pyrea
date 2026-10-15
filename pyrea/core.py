@@ -25,6 +25,7 @@ from deap import base, creator, tools, algorithms
 from .structure import Agreement, Clusterer, DBSCANPyrea, Disagreement
 from .structure import Ensemble, Fusion, HierarchicalClusteringPyrea
 from .structure import OPTICSPyrea, SpectralClusteringPyrea, View, Consensus
+from .structure import _label_vectors
 
 CLUSTER_METHODS = ['spectral', 'hierarchical', 'dbscan', 'optics']
 FUSION_METHODS = ['agreement', 'consensus', 'disagreement']
@@ -213,6 +214,7 @@ def consensus(labels: list):
     if len(labels) <= 1:
         raise ValueError("You must provide a list of labellings of length >= 2.")
 
+    labels = _label_vectors(labels)
     n_samp    = len(labels[0])
     cl_cons   = np.zeros((n_samp,), dtype=int)
     n_cl = len(labels)

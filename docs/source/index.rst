@@ -118,6 +118,7 @@ Main Documentation
    :maxdepth: 3
 
    code
+   graphs
    extending
    license
 
