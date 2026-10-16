@@ -140,7 +140,44 @@ calls with new data. Execution is currently sequential.
 the first example. `with_params()` creates an independent configured copy for
 an optimization trial. Custom blocks can expose their own parameters through
 `get_params()` and `set_params()`. These hooks support parameter search over
-custom graphs; a general graph optimizer or topology search is not yet included.
+custom graphs.
+
+### Genetic optimization of graph configurations
+
+`pyrea.optim.genetic_search()` searches block parameters while keeping the
+topology fixed. For the `MyEnsemble` graph above:
+
+```python
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+from pyrea import optim
+
+# Define the evaluation geometry once, independently of candidate parameters.
+evaluation_features = StandardScaler().fit_transform(
+    np.column_stack([data_rna, data_methylation])
+)
+search = optim.genetic_search(
+    model,
+    inputs={'rna': data_rna, 'methylation': data_methylation},
+    search_space={
+        'rna_cluster': {'method': ['ward', 'average'], 'n_clusters': optim.Int(2, 5)},
+        'meth_cluster': {'method': ['complete', 'average'], 'n_clusters': optim.Int(2, 5)},
+        'final': {'n_clusters': optim.Int(2, 5)},
+    },
+    fitness=lambda labels: silhouette_score(evaluation_features, labels),
+    population_size=12, generations=5, random_state=42,
+)
+best_labels = search.best_graph(rna=data_rna, methylation=data_methylation)
+print(search.best_score, search.best_params)
+```
+
+Search spaces use **block names**, with `Choice`, inclusive `Int`, and `Float`
+domains. Lists of parameter mappings define conditional cases, allowing a block
+to switch clustering families with their respective hyperparameters. The result
+includes an independent best graph, evaluation history, and generation logbook.
+The original graph is unchanged. Scores are maximized unless `maximize=False`.
+Set estimator seeds as well as the search seed for reproducibility. See the
+[guide](docs/source/graphs.rst) for conditional spaces and failure handling.
 
 ### Predefined Parea graphs
 
@@ -187,7 +224,8 @@ custom blocks, sample alignment, parameter search, and compatibility details.
 - [Nutrimouse graph tutorial](notebooks/Nutrimouse_Graphs.ipynb): executable
   examples of functional graph construction, `Module.forward()` composition,
   custom blocks and topologies, NetworkX traversal, Parea graph builders,
-  spectral affinities, and parameter trials. The small Nutrimouse CSV dataset
+  spectral affinities, grid trials, and genetic hyperparameter optimization.
+  The small Nutrimouse CSV dataset
   is bundled with provenance so the notebook runs without downloading data or
   installing `mvlearn`. Its evaluation tables are computed from the current run.
 - [Original Nutrimouse notebook](notebooks/Nutrimouse.ipynb): the earlier eager
@@ -278,9 +316,9 @@ pyrea.parea_2(data, *params, k_final=3)
 
 The fixed `parea_2_genetic` helper expects three views. The older
 `parea_2_mv_genetic` helper currently has a string-formatting failure and is
-not used by the graph API. For custom graph configurations, use the parameter
-search hooks described above; these genetic helpers do not optimize arbitrary
-graph topologies.
+not used by the graph API. For custom graph configurations, use
+`pyrea.optim.genetic_search()` described above. The older helpers retain their
+predefined structures.
 
 ### API
 
@@ -487,11 +525,11 @@ for that interface.
 
 ## Future work
 
-### General genetic optimization
+### Graph-topology search
 
-The graph API provides configuration and execution hooks for optimizers.
-General genetic optimization of custom graphs and graph-topology search are
-future work. The historical HCfused C++ source remains in the repository for
+Genetic optimization supports the parameters of custom graphs with fixed
+connectivity. Evolving graph connectivity remains future work.
+The historical HCfused C++ source remains in the repository for
 reference; integrating it is not part of the current direction.
 
 ## Tests

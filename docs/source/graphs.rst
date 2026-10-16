@@ -62,7 +62,7 @@ and dictionaries of blocks can be nested to organize larger topologies.
 
    class TwoViewEnsemble(nn.Module):
        def __init__(self, n_clusters=3):
-           self.rna_cluster = nn.Hierarchical(n_clusters, method='ward')
+           self.rna_cluster = nn.Cluster('hierarchical', n_clusters=n_clusters, method='ward')
            self.meth_cluster = nn.Hierarchical(n_clusters, method='complete')
            self.fusion = nn.Fusion('disagreement')
            self.final = nn.Hierarchical(n_clusters, input_kind=nn.DISTANCE)
@@ -211,12 +211,106 @@ the desired parameters in the same trial. Changes must retain compatible
 connection kinds. Changing a fusion output from distance to affinity requires
 rebuilding the graph with suitable downstream blocks.
 
-These hooks support optimizers and tools such as scikit-learn's
-``ParameterGrid``; a new optimizer or graph-topology search algorithm is not
-included. Choose an explicit evaluation output and metric, and set random
-seeds for stochastic clusterers. For silhouette evaluation, expose both final
-labels and the appropriate distance matrix as outputs; do not pass affinity
-weights as distances.
+These hooks support ``pyrea.optim.genetic_search`` and tools such as
+scikit-learn's ``ParameterGrid``. Choose an explicit evaluation output and
+metric, and set random seeds for stochastic clusterers. When comparing
+candidate configurations, consider using a fixed evaluation geometry defined
+independently of their parameters. Silhouette requires features or distances;
+do not pass affinity weights as distances.
+
+Genetic optimization
+--------------------
+
+``genetic_search`` optimizes configurations of any compiled graph, including
+custom topologies and shared blocks. Connectivity stays fixed. Search spaces
+map **block names** from ``named_blocks()`` to parameter mappings. A list of
+mappings defines conditional cases, keeping algorithm-specific parameters
+together during crossover and mutation:
+
+.. code-block:: python
+
+   from sklearn.metrics import silhouette_score
+   from sklearn.preprocessing import StandardScaler
+   from pyrea import optim
+
+   evaluation_features = StandardScaler().fit_transform(
+       np.column_stack([data_rna, data_methylation])
+   )
+   space = {
+       'rna_cluster': [
+           {'clusterer': 'hierarchical', 'method': ['ward', 'average'],
+            'n_clusters': optim.Int(2, 5)},
+           {'clusterer': 'spectral', 'affinity': 'rbf',
+            'gamma': optim.Float(0.001, 0.1, log=True),
+            'n_clusters': optim.Int(2, 5), 'random_state': 42},
+       ],
+       'meth_cluster': {'method': ['complete', 'average']},
+       'final': {'n_clusters': optim.Int(2, 5)},
+   }
+   original_params = model.get_params()
+   search = optim.genetic_search(
+       model, {'rna': data_rna, 'methylation': data_methylation}, space,
+       fitness=lambda labels: silhouette_score(evaluation_features, labels),
+       population_size=12, generations=5, random_state=42,
+   )
+   best_labels = search.best_graph(rna=data_rna, methylation=data_methylation)
+   assert model.get_params() == original_params
+   print(search.best_score, search.best_params)
+
+``Choice([...])`` and bare lists/tuples specify categorical choices; other
+scalars specify fixed values. ``Int(low, high)`` includes both bounds.
+``Float(low, high, log=True)`` samples positive values on a logarithmic scale.
+Use ``Choice([[...], ...])`` when individual parameter values are themselves
+lists. Each candidate's active parameters override a fresh copy of the
+original configuration. A family switch starts with the new family's defaults;
+include all desired settings for that family in its case. Other blocks retain
+their original parameters. Shared blocks receive one configuration across all
+their calls. Custom blocks participate through ``get_params`` / ``set_params``.
+
+The fitness callable receives exactly what ``graph.run(inputs)`` returns: a
+single value or a dictionary for named outputs. It must return a finite real
+scalar. Set ``maximize=False`` for a loss. Labels for external validation are
+not required by the optimizer; choosing an objective remains the caller's
+responsibility. The Nutrimouse notebook uses a fixed, label-free distance matrix
+and reserves genotype annotations for later evaluation.
+
+Evolution uses tournament selection, crossover, mutation, and elitism. A
+mutation resamples one active parameter or switches a block's conditional case;
+crossover exchanges compatible parameters or whole cases. ``population_size``
+sets the initial population and ``generations`` counts subsequent generations.
+With default ``elitism=1``, evaluation requests total
+``population_size + generations * (population_size - 1)``. Each candidate runs
+sequentially on its own graph copy. Elites retain their recorded scores.
+``random_state`` controls only the evolutionary RNG; seed stochastic estimators
+and objectives separately. No global random seeds or DEAP creator classes are
+modified.
+
+The result exposes:
+
+* ``best_graph``: a configured copy ready to run, without retained trial state.
+* ``best_params``: active overrides using ``block__parameter`` keys, suitable
+  for ``original.with_params(**search.best_params)``.
+* ``best_score``: the best observed finite fitness.
+* ``history``: one dictionary per evaluation request, with generation,
+  individual index, parameters, score, status, cache flag, failure phase,
+  and error message. Failed scores are ``None``.
+* ``logbook``: a DEAP logbook with per-generation evaluations, cache hits,
+  valid/failed population counts, generation best, overall best, and mean score.
+* ``n_evaluations``: actual attempts, excluding cache hits and retained elites.
+
+By default, candidate configuration, execution, or fitness errors raise
+``SearchError``, which preserves the original cause, history, and completed
+generation summaries. ``on_error='penalize'`` records candidate failures and
+assigns worst fitness so search can continue. If every attempt fails, the
+search raises ``SearchError`` rather than returning a failed candidate.
+
+``cache=True`` reuses scores, including failures, for identical active parameter
+overrides. It requires picklable parameter values and deterministic operations
+and fitness. The default is ``False``, so duplicate candidates are reevaluated.
+An unseeded stochastic graph may produce a different score when the returned
+best graph is run again. Custom operations and fitness must treat input data
+and outputs as read-only; graph copies do not isolate mutable callable closures.
+The search changes configurations only; evolving graph edges is not included.
 
 Predefined Parea topologies
 ---------------------------
@@ -259,3 +353,6 @@ API reference
 
 .. automodule:: pyrea.models
    :members:
+
+.. automodule:: pyrea.optim
+   :members: Choice, Int, Float, SearchResult, SearchError, genetic_search
