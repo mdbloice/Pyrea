@@ -271,8 +271,12 @@ The fitness callable receives exactly what ``graph.run(inputs)`` returns: a
 single value or a dictionary for named outputs. It must return a finite real
 scalar. Set ``maximize=False`` for a loss. Labels for external validation are
 not required by the optimizer; choosing an objective remains the caller's
-responsibility. The Nutrimouse notebook uses a fixed, label-free distance matrix
-and reserves genotype annotations for later evaluation.
+responsibility. The Nutrimouse notebook starts with the original Parea 2
+fused-distance objective on the supplied measurements. Separate comparisons
+change standardization and a fixed, label-free view-distance objective while
+holding topology and search settings constant. Both silhouettes and genotype/diet
+agreement are reported; the annotations do not enter either fitness callable.
+The historical configuration is replayed separately from fresh genetic searches.
 
 Evolution uses tournament selection, crossover, mutation, and elitism. A
 mutation resamples one active parameter or switches a block's conditional case;

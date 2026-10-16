@@ -221,13 +221,17 @@ custom blocks, sample alignment, parameter search, and compatibility details.
 
 ## Demonstration Notebooks
 
-- [Nutrimouse graph tutorial](notebooks/Nutrimouse_Graphs.ipynb): executable
-  examples of functional graph construction, `Module.forward()` composition,
-  custom blocks and topologies, NetworkX traversal, Parea graph builders,
-  spectral affinities, grid trials, and genetic hyperparameter optimization.
-  The small Nutrimouse CSV dataset
-  is bundled with provenance so the notebook runs without downloading data or
-  installing `mvlearn`. Its evaluation tables are computed from the current run.
+- [Nutrimouse graph tutorial](notebooks/Nutrimouse_Graphs.ipynb): replays the
+  original raw-data Parea 2 configuration and runs a fresh genetic search with
+  its original parameter ranges, population/generation settings, and
+  fused-distance silhouette objective. Separate comparisons vary standardization
+  and objective while retaining the Parea 2 topology and search settings. Tables
+  report both fused-distance and fixed-view silhouette, plus genotype and diet
+  agreement. Further examples cover custom graphs, `Module.forward()`, NetworkX
+  traversal, spectral affinities, and conditional parameter searches. The small
+  dataset is bundled with provenance, so execution needs no data download or
+  `mvlearn`. Scores are computed from the current run; the original saved
+  partition verifies the replay independently of cluster numbering.
 - [Original Nutrimouse notebook](notebooks/Nutrimouse.ipynb): the earlier eager
   API demonstration using hierarchical and spectral clustering with genetic
   helpers and comparisons against `mvlearn` algorithms. It requires the optional
