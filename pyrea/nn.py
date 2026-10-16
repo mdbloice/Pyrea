@@ -38,6 +38,9 @@ __all__ = [
     "Consensus",
     "Function",
     "AffinityToDistance",
+    "Transform",
+    "Standardize",
+    "Estimator",
     "FEATURES",
     "LABELS",
     "DISTANCE",
@@ -207,19 +210,35 @@ class Function(Block):
     inputs as read-only and preserve sample order and sample count.
     """
 
-    def __init__(self, function, input_kinds, output_kind=FEATURES, name=None):
+    def __init__(self, function, input_kinds, output_kind=FEATURES, name=None, inductive=False):
         if not callable(function):
             raise TypeError("function must be callable")
+        if not isinstance(inductive, bool):
+            raise TypeError("inductive must be a boolean")
         self.function = function
         self.input_kinds = dict(input_kinds)
         self.output_kind = output_kind
         self.name = name
+        self.inductive = inductive
 
     def _signature(self):
         return inspect.signature(self.function)
 
     def forward(self, *args, **kwargs):
         return self.function(*args, **kwargs)
+
+    def fit_forward(self, *args, **kwargs):
+        if not self.inductive:
+            raise TypeError(
+                "Function requires inductive=True for a stateless row-wise operation; "
+                "use Transform for fitted preprocessing"
+            )
+        return self.forward(*args, **kwargs)
+
+    def predict_forward(self, *args, **kwargs):
+        if not self.inductive:
+            raise TypeError("Function requires inductive=True for prediction")
+        return self.forward(*args, **kwargs)
 
 
 class AffinityToDistance(Block):
@@ -244,8 +263,130 @@ class AffinityToDistance(Block):
     def get_params(self):
         return {"normalize": self.normalize}
 
+    def fit_forward(self, affinity):
+        self.maximum_ = float(np.asarray(affinity).max())
+        return self.forward(affinity)
+
+    def predict_forward(self, affinity):
+        # Cross-affinities need not have a diagonal. Saturate above the fitted
+        # maximum, without learning a new maximum from the prediction batch.
+        distance = np.maximum(self.maximum_ - np.asarray(affinity, dtype=float), 0)
+        if self.normalize and self.maximum_:
+            distance /= self.maximum_
+        return distance
+
     def set_params(self, **params):
         if set(params) - {"normalize"}:
             raise ValueError("Only normalize can be configured")
         self.normalize = params.get("normalize", self.normalize)
+        return self
+
+
+class Transform(Block):
+    """Retain a fitted sklearn-style feature transformer for inductive use.
+
+    Eager forward fits a fresh copy, as other transductive blocks do. Graph.fit
+    retains a separate fitted copy for every executable call.
+    """
+
+    input_kinds = {"data": FEATURES}
+    output_kind = FEATURES
+
+    def __init__(self, transformer, name=None):
+        if not callable(getattr(transformer, "fit", None)) or not callable(
+            getattr(transformer, "transform", None)
+        ):
+            raise TypeError("Transform requires fit() and transform()")
+        self.transformer, self.name = transformer, name
+
+    def _fit(self, data):
+        estimator = copy.deepcopy(self.transformer)
+        data = copy.deepcopy(data)
+        if callable(getattr(estimator, "fit_transform", None)):
+            output = estimator.fit_transform(data)
+        else:
+            output = estimator.fit(data).transform(data)
+        return estimator, output
+
+    def forward(self, data):
+        return self._fit(data)[1]
+
+    def fit_forward(self, data):
+        self.transformer_, output = self._fit(data)
+        return output
+
+    def predict_forward(self, data):
+        return self.transformer_.transform(copy.deepcopy(data))
+
+    def get_params(self):
+        getter = getattr(self.transformer, "get_params", None)
+        return copy.deepcopy(getter()) if callable(getter) else {}
+
+    def set_params(self, **params):
+        if params:
+            self.transformer.set_params(**params)
+        return self
+
+
+class Standardize(Transform):
+    """StandardScaler with retained training statistics during Graph.predict."""
+
+    def __init__(self, name=None, **params):
+        from sklearn.preprocessing import StandardScaler
+
+        super().__init__(StandardScaler(**params), name=name)
+
+
+class Estimator(Block):
+    """Adapt a clustering estimator with native fit/predict (e.g. KMeans).
+
+    The configured estimator is copied per training call. No fitting occurs
+    during prediction. Native labels must belong to its training label set.
+    """
+
+    output_kind = LABELS
+
+    def __init__(self, estimator, input_kind=FEATURES, name=None):
+        if not callable(getattr(estimator, "fit", None)) or not callable(
+            getattr(estimator, "predict", None)
+        ):
+            raise TypeError("Estimator requires native fit() and predict()")
+        if input_kind not in (FEATURES, DISTANCE, AFFINITY):
+            raise ValueError("Estimator input must be features, distances, or affinities")
+        self.estimator, self.input_kind, self.name = estimator, input_kind, name
+
+    @property
+    def input_kinds(self):
+        """Accepted semantic kind for the estimator's data input."""
+        return {"data": self.input_kind}
+
+    def _fit(self, data):
+        estimator = copy.deepcopy(self.estimator)
+        data = copy.deepcopy(data)
+        if callable(getattr(estimator, "fit_predict", None)):
+            output = estimator.fit_predict(data)
+        else:
+            estimator.fit(data)
+            output = getattr(estimator, "labels_", None)
+            if output is None:
+                output = estimator.predict(data)
+        return estimator, output
+
+    def forward(self, data):
+        return self._fit(data)[1]
+
+    def fit_forward(self, data):
+        self.estimator_, output = self._fit(data)
+        return output
+
+    def predict_forward(self, data):
+        return self.estimator_.predict(copy.deepcopy(data))
+
+    def get_params(self):
+        getter = getattr(self.estimator, "get_params", None)
+        return copy.deepcopy(getter()) if callable(getter) else {}
+
+    def set_params(self, **params):
+        if params:
+            self.estimator.set_params(**params)
         return self

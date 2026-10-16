@@ -119,6 +119,7 @@ Main Documentation
 
    code
    graphs
+   inductive
    extending
    license
 

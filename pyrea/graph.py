@@ -154,6 +154,21 @@ class Block(Module):
             raise ValueError("{} has no tunable parameters".format(self.__class__.__name__))
         return self
 
+    def fit_forward(self, *args, **kwargs):
+        """Fit on training inputs and return training output for inductive use.
+
+        Custom blocks implement this and predict_forward. Each executable call
+        gets its own copied block, including calls sharing configuration.
+        """
+        raise TypeError(
+            "{} has no inductive implementation; implement fit_forward and "
+            "predict_forward, or use Transform/Estimator".format(self.__class__.__name__)
+        )
+
+    def predict_forward(self, *args, **kwargs):
+        """Apply frozen state to new rows without fitting or batch statistics."""
+        raise TypeError("{} has no inductive implementation".format(self.__class__.__name__))
+
 
 class SampleData:
     """Attach ordered sample identifiers to an array for alignment validation.
@@ -293,7 +308,7 @@ class Graph(Module):
 
     def with_params(self, **params):
         """Return an independent configured copy for a search trial."""
-        result = copy.deepcopy(self)
+        result = self._configuration_copy()
         grouped = {}
         for key, value in params.items():
             name, separator, parameter = key.partition("__")
@@ -305,6 +320,89 @@ class Graph(Module):
         for node in result._nodes.values():
             result._ports(node)
         return result
+
+    def _configuration_copy(self):
+        """Copy configuration and symbolic connections without fitted artifacts."""
+        result = self.__class__.__new__(self.__class__)
+        result.__dict__ = copy.deepcopy(
+            {key: value for key, value in self.__dict__.items() if key != "_fitted"}
+        )
+        return result
+
+    def fit(self, inputs=None, *, assignment="nearest", consensus="nearest", **views):
+        """Fit an inductive snapshot and return self.
+
+        Supply a mapping or named views. Non-native clusterers transfer frozen
+        training labels using nearest, average, or medoid assignment; a mapping
+        selects rules by block name. Consensus uses the nearest observed tuple
+        for unseen combinations, or rejects them with consensus='raise'.
+        """
+        from .inductive import FittedGraph, input_mapping
+
+        self._fitted = None
+        self._fitted = FittedGraph(
+            self._configuration_copy(), input_mapping(inputs, views), assignment, consensus
+        )
+        return self
+
+    def _require_fitted(self):
+        fitted = getattr(self, "_fitted", None)
+        if fitted is None:
+            from sklearn.exceptions import NotFittedError
+
+            raise NotFittedError("Call Graph.fit() before inductive prediction")
+        return fitted
+
+    def predict(self, inputs=None, *, output=None, **views):
+        """Assign new rows to learned labels; never refit or recluster.
+
+        Select a named label output with output. By default use 'labels', a
+        single label output, or the graph's single label result.
+        """
+        from .inductive import input_mapping
+
+        fitted = self._require_fitted()
+        key = fitted.label_output(output)
+        result = fitted.transform(input_mapping(inputs, views))
+        return np.array(result if key is None else result[key], copy=True)
+
+    def transform(self, inputs=None, *, return_intermediates=False, **views):
+        """Apply fitted blocks and return all declared outputs.
+
+        Pairwise outputs have shape (new samples, training samples), including
+        when there is only one new sample. No diagonal is overwritten.
+        """
+        from .inductive import input_mapping
+
+        return self._require_fitted().transform(
+            input_mapping(inputs, views), return_intermediates=return_intermediates
+        )
+
+    def fit_predict(
+        self, inputs=None, *, output=None, assignment="nearest", consensus="nearest", **views
+    ):
+        """Fit and return the selected training partition, without reassignment."""
+        self.fit(inputs, assignment=assignment, consensus=consensus, **views)
+        fitted = self._require_fitted()
+        key = fitted.label_output(output)
+        result = fitted.training_output
+        return np.array(result if key is None else result[key], copy=True)
+
+    @property
+    def training_output_(self):
+        """Copy of the transductive output observed during fit."""
+        return copy.deepcopy(self._require_fitted().training_output)
+
+    @property
+    def labels_(self):
+        fitted = self._require_fitted()
+        key = fitted.label_output(None)
+        output = fitted.training_output
+        return np.array(output if key is None else output[key], copy=True)
+
+    @property
+    def n_samples_fit_(self):
+        return self._require_fitted().n_train
 
     def forward(self, *args, **inputs):
         if len(args) > len(self.inputs):

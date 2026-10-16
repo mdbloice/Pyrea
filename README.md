@@ -179,6 +179,48 @@ The original graph is unchanged. Scores are maximized unless `maximize=False`.
 Set estimator seeds as well as the search seed for reproducibility. See the
 [guide](docs/source/graphs.rst) for conditional spaces and failure handling.
 
+### Train once and assign new samples
+
+Compiled graphs support inductive `fit()` / `predict()` execution. Prediction
+accepts one new sample or a batch and uses frozen preprocessing, training
+references, and cluster identities. It does not rerun clustering or optimization.
+
+```python
+model = MyEnsemble().compile()
+model.fit({'rna': data_rna, 'methylation': data_methylation}, assignment='nearest')
+new_patient = {
+    'rna': data_rna[:1] + 0.1,
+    'methylation': data_methylation[:1] + 0.1,
+}
+assigned_labels = model.predict(new_patient)  # shape (1,)
+training_labels = model.labels_
+```
+
+For hierarchical, spectral, DBSCAN, and OPTICS blocks, this is an explicit
+**frozen-label assignment extension**. The default transfers the label of the
+nearest training sample. `assignment='average'` uses average distance to each
+training cluster; `'medoid'` uses its learned representative. Rules can also be
+set per named clustering block. These rules preserve the training partition;
+they do not claim native prediction for a transductive algorithm.
+
+Use `nn.Standardize()` or `nn.Transform(StandardScaler())` for retained training
+statistics, and `nn.Estimator(KMeans(...))` for an estimator with native
+`predict()`. Custom blocks implement `fit_forward()` and `predict_forward()`.
+An arbitrary function or a block that refits preprocessing in `forward()`
+cannot automatically become inductive.
+
+Fitted fusion computes new-by-training pairwise matrices. Final consensus keeps
+the learned label mapping; unseen membership combinations use the nearest
+observed tuple, or raise with `consensus='raise'`. `predict()` returns labels,
+while `transform()` exposes all declared outputs and optional intermediates.
+`run()` and ordinary graph calls retain their transductive behavior.
+
+After genetic search, call `search.best_graph.fit(training_views)` before
+prediction. Parameter copies made with `with_params()` are unfitted. See the
+[inductive guide](docs/source/inductive.rst) and
+[held-out Nutrimouse notebook](notebooks/Nutrimouse_Inductive.ipynb) for the
+assignment definitions, sample schemas, and persistence examples.
+
 ### Predefined Parea graphs
 
 ```python
@@ -221,6 +263,10 @@ custom blocks, sample alignment, parameter search, and compatibility details.
 
 ## Demonstration Notebooks
 
+- [Inductive Nutrimouse tutorial](notebooks/Nutrimouse_Inductive.ipynb): fits a
+  multi-view graph on a training subset, assigns held-out mice individually and
+  in batches, verifies unchanged training state, and demonstrates retained
+  preprocessing, native prediction, and serialization.
 - [Nutrimouse graph tutorial](notebooks/Nutrimouse_Graphs.ipynb): replays the
   original raw-data Parea 2 configuration and runs a fresh genetic search with
   its original parameter ranges, population/generation settings, and
@@ -228,7 +274,8 @@ custom blocks, sample alignment, parameter search, and compatibility details.
   and objective while retaining the Parea 2 topology and search settings. Tables
   report both fused-distance and fixed-view silhouette, plus genotype and diet
   agreement. Further examples cover custom graphs, `Module.forward()`, NetworkX
-  traversal, spectral affinities, and conditional parameter searches. The small
+  traversal, spectral affinities, conditional parameter searches, and fitting
+  once to assign a single new sample. The small
   dataset is bundled with provenance, so execution needs no data download or
   `mvlearn`. Scores are computed from the current run; the original saved
   partition verifies the replay independently of cluster numbering.

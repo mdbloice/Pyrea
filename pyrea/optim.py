@@ -276,7 +276,7 @@ def genetic_search(
         _integer("random_state", random_state, 0)
         random_state = int(random_state)
     rng = random.Random(random_state)
-    template = copy.deepcopy(graph)
+    template = graph._configuration_copy()
     space = _space(template, search_space)
     history, logbook, cached = [], tools.Logbook(), {}
     n_evaluations = 0

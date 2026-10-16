@@ -203,6 +203,10 @@ original configuration unchanged. Custom blocks can expose configuration by
 implementing ``get_params()`` and ``set_params(**params)``. Such blocks must
 support deep copying; callable closures should not hide mutable trial state.
 
+For training once and assigning new samples, see :doc:`inductive`. The
+``fit`` / ``predict`` lifecycle retains a separate fitted snapshot. Ordinary
+calls and ``run`` keep the transductive behavior described above.
+
 ``Cluster`` exposes the clustering family as ``clusterer`` and accepts its
 parameters as keyword arguments. For example,
 ``nn.Cluster('spectral', n_clusters=3, random_state=42)``. Switching a generic
@@ -353,7 +357,7 @@ API reference
    :members: Input, Node, Module, Block, Graph, SampleData
 
 .. automodule:: pyrea.nn
-   :members: Cluster, Hierarchical, Fusion, Consensus, Function, AffinityToDistance
+   :members: Cluster, Hierarchical, Fusion, Consensus, Function, AffinityToDistance, Transform, Standardize, Estimator
 
 .. automodule:: pyrea.models
    :members:
