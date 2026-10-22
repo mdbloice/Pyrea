@@ -263,6 +263,13 @@ custom blocks, sample alignment, parameter search, and compatibility details.
 
 ## Demonstration Notebooks
 
+- [Nutrimouse with the new API](notebooks/Nutrimouse_New_API.ipynb): follows the
+  original notebook's sequence with hierarchical and spectral Parea 1, three
+  genetic searches, comparisons against the same three optional `mvlearn`
+  methods, and hierarchical Parea 2. It retains the raw views and original
+  search ranges and population/generation settings, fixes every final layer
+  at `k_final=2`, and computes the results and selected configurations from
+  the current run. Installation notes cover the optional comparison dependency.
 - [Inductive Nutrimouse tutorial](notebooks/Nutrimouse_Inductive.ipynb): fits a
   multi-view graph on a training subset, assigns held-out mice individually and
   in batches, verifies unchanged training state, and demonstrates retained
